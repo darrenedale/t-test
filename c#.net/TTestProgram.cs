@@ -7,7 +7,7 @@ namespace Statistics
 
     class TTestProgram
     {
-        const TTest.TestType DefaultTestType = TTest.TestType.Unpaired;
+        const TTestType DefaultTestType = TTestType.Unpaired;
 
         const int ExitOk = 0;
         const int ExitErrInvalidArgs = 1;
@@ -15,13 +15,11 @@ namespace Statistics
 
         static int Main(string[] args)
         {
-            string dataFilePath = "";
-            TTest.TestType type = DefaultTestType;
+            string dataFilePath = null;
+            TTestType type = DefaultTestType;
 
             for (int i = 0; i < args.Length; ++i) {
-                string canonicalArg = args[i].ToLower();
-
-                if("-t" == canonicalArg) {
+                if("-t" == args[i]) {
                     ++i;
 
                     if (i >= args.Length) {
@@ -32,10 +30,10 @@ namespace Statistics
                     string arg = args[i].ToLower();
 
                     if("paired" == arg) {
-                        type = TTest.TestType.Paired;
+                        type = TTestType.Paired;
                     }
                     else if("unpaired" == arg) {
-                        type = TTest.TestType.Unpaired;
+                        type = TTestType.Unpaired;
                     }
                     else {
                         Console.Error.WriteLine($"ERR unrecognised test type \"{arg}\"");
@@ -49,7 +47,7 @@ namespace Statistics
                 }
             }
 
-            if ("" == dataFilePath) {
+            if (null == dataFilePath) {
                 Console.Error.WriteLine("ERR no data file specified");
                 return ExitErrInvalidArgs;
             }

@@ -3,15 +3,16 @@ namespace Statistics
     using System;
     using System.Collections.Generic;
 
+    public enum TTestType
+    {
+        Paired = 0,
+        Unpaired
+    }
+
+
     public class TTest
     {
-        public enum TestType
-        {
-            Paired = 0,
-            Unpaired
-        }
-
-        public TTest(DataFile data, TestType type)
+        public TTest(DataFile data, TTestType type)
         {
             this.type = type;
             this.data = data;
@@ -22,10 +23,10 @@ namespace Statistics
             get
             {
                 switch (type) {
-                    case TestType.Paired:
+                    case TTestType.Paired:
                         return pairedT;
 
-                    case TestType.Unpaired:
+                    case TTestType.Unpaired:
                         return unpairedT;
 
                     default:
@@ -97,7 +98,7 @@ namespace Statistics
             }
         }
 
-        public TestType type;
+        public TTestType type;
         public DataFile data;
 
     }

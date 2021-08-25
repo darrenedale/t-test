@@ -6,6 +6,9 @@ namespace Statistics
 
     using ValueType = System.Double;
 
+    ///<summary>
+    /// </summary>
+    /// TODO make generic for ValueType (will need parsing capability, NaN capability and implementation of Pow)
     public class DataFile
     {
         public DataFile(string fileName)
@@ -170,22 +173,22 @@ namespace Statistics
             return count;
         }
 
-			private double sum(int r1, int c1, int r2, int c2, double pow = 1.0)
-            {
-				double sum = 0.0;
+        private double sum(int r1, int c1, int r2, int c2, double pow = 1.0)
+        {
+            double sum = 0.0;
 
-				for(int r = r1; r <= r2; ++r) {
-					for(int c = c1; c <= c2; ++c) {
-						double v = m_data[r][c];
+            for(int r = r1; r <= r2; ++r) {
+                for(int c = c1; c <= c2; ++c) {
+                    double v = m_data[r][c];
 
-						if(!Double.IsNaN(v)) {
-							sum += Math.Pow(m_data[r][c], pow);
-						}
-					}
-				}
+                    if(!Double.IsNaN(v)) {
+                        sum += Math.Pow(m_data[r][c], pow);
+                    }
+                }
+            }
 
-				return sum;
-			}
+            return sum;
+        }
 
         double mean(int r1, int c1, int r2, int c2, double meanNumber = 1.0)
         {
