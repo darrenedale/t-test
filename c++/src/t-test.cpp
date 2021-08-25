@@ -4,72 +4,131 @@
 #include <cctype>
 #include <functional>
 #include <algorithm>
+#include <optional>
 
 #include "TTest.h"
-#include "DataFile.h"
 
 using namespace Statistics;
 
-/**
- * Convert a string to lower case, in-place.
- *
- * After the function returns, the string will be all lower-case.
- *
- * @note This should be a tad quicker than std::transform() because it requires fewer args passed to for_each and only transforms the char if necessary.
- * TODO put this in a namespace.
- *
- * @param str The string to convert.
- */
-void toLower( std::string & str )
+namespace
 {
-	std::for_each(str.begin(), str.end(), [] (char & c) {
-        if(std::isupper(c)) {
-            c = static_cast<char>(std::tolower(c));
+    /**
+     * Program exit codes.
+     */
+    constexpr const int ExitOk = 0;
+    constexpr const int ExitErrMissingTestType = 1;
+    constexpr const int ExitErrUnrecognisedTestType = 2;
+    constexpr const int ExitErrNoDataFile = 3;
+
+    /**
+     * Options for for -t command-line arg.
+     */
+    constexpr const char * PairedTestTypeArg = "paired";
+    constexpr const char * UnpairedTestTypeArg = "unpaired";
+
+    /**
+     * Get a lower-case version of a string.
+     *
+     * @param str The string to convert.
+     *
+     * @return The lower-case equivalent of the provided string.
+     */
+    inline std::string toLower(const std::string_view & str)
+    {
+        std::string ret;
+        std::transform(str.cbegin(), str.cend(), std::back_inserter(ret), [](const auto & ch) -> auto {
+            return static_cast<std::string_view::value_type>(std::tolower(ch));
+        });
+
+        return ret;
+    }
+
+    /**
+     * Parse the test type provided on the command line to a TestType.
+     *
+     * @param type The string to parse.
+     *
+     * @return The test type, or an empty optional if the string is invalid.
+     */
+    std::optional<TTestType> parseTestType(const std::string_view & type)
+    {
+        const auto lowerType = toLower(type);
+
+        if (PairedTestTypeArg == lowerType) {
+            return TTestType::Paired;
+        } else if(UnpairedTestTypeArg == lowerType) {
+            return TTestType::Unpaired;
         }
-    });
+
+        return {};
+    }
+
+    /**
+     * Write a DataFile to an output stream.
+     *
+     * @tparam T The (inferred) value type for the data file.
+     * @param out The output stream to write to.
+     * @param data The DataFile to write.
+     * @return The output stream.
+     */
+    template<class ValueType>
+    std::ostream & operator<<(std::ostream & out, const DataFile<ValueType> & data)
+    {
+        out << std::dec << std::fixed << std::left << std::setfill(' ') << std::setprecision(3);
+
+        for (int row = 0; row < data.rowCount(); ++row) {
+            for (int column = 0; column < data.columnCount(); ++column) {
+                try {
+                    out << data.item(row, column) << "  ";
+                } catch (const std::invalid_argument & e) {
+                    out << "      ";
+                }
+            }
+
+            out << "\n";
+        }
+
+        return out;
+    }
 }
 
 /**
  * Entry point.
  * 
- * As always, the first argv is the binary. Other args are:
- * - -t specifies the type of test. Follow it with "paried" or "unpaired".
+ * As always, the first argv is the binary. Other possible args are:
+ * - -t specifies the type of test. Follow it with "paired" or "unpaired".
  * - The first arg not recognised as an option is considered the name of the data file.
- *
- * TODO error constants not numeric literals.
  *
  * @param argc Number of command-line args.
  * @param argv Command-line args array, all null-terminated c strings.
  */
 int main(int argc, char ** argv)
 {
-    using TTest::TestType;
-	auto type = TestType::Unpaired;
-	std::string dataFilePath;
+	auto type = TTestType::Unpaired;
+	std::optional<std::string> dataFilePath;
 
     // read command-line args
-	if(1 < argc) {
-		for(int i = 1; i < argc; ++i) {
-			std::string arg(argv[i]);
-			toLower(arg);
+	if (1 < argc) {
+		for (int i = 1; i < argc; ++i) {
+			std::string_view arg(argv[i]);
 
-			if("-t" == arg) {
+			if ("-t" == arg) {
 				++i;
-				arg = argv[i];
-				toLower(arg);
 
-				if("paired" == arg) {
-					type = TestType::Paired;
+                if (i >= argc) {
+                    std::cerr << "ERR -t option requires a type of test - paired or unpaired\n";
+                    return ExitErrMissingTestType;
+                }
+
+                auto parsedType = parseTestType(argv[i]);
+
+                if (!parsedType) {
+					std::cerr << "ERR unrecognised test type \"" << argv[i] << "\"\n";
+                    return ExitErrUnrecognisedTestType;
 				}
-				else if("unpaired" == arg) {
-					type = TestType::Unpaired;
-				}
-				else {
-					std::cerr << "ERR unrecognised test type \"" << arg << "\"" << std::endl;
-                    return 1;
-				}
-			}
-			else {
+
+                type = *parsedType;
+			} else {
 				// first unrecognised arg is data file path
 				dataFilePath = arg;
 				break;
@@ -77,33 +136,16 @@ int main(int argc, char ** argv)
 		}
 	}
 
-	if (dataFilePath.empty()) {
+	if (!dataFilePath) {
       std::cerr << "No data file provided.\n";
-      return 2;
+      return ExitErrNoDataFile;
     }
 
-    // read the data
-	auto data = TTest::DataFileType(dataFilePath);
-	std::cout << std::dec << std::fixed << std::left << std::setfill(' ') << std::setprecision(3);
+    // read and output the data
+	auto data = TTest::DataFileType(*dataFilePath);
+	std::cout << std::dec << std::fixed << std::left << std::setfill(' ') << std::setprecision(3) << data;
 
-    // output the table of data
-	for(int r = 0; r < data.rowCount(); ++r) {
-		for(int c = 0; c < data.columnCount(); ++c) {
-			try {
-				std::cout << data.item(r, c) << "  ";
-			}
-			catch (const std::invalid_argument & e) {
-				std::cout << "      ";
-			} catch (const std::exception & e) {
-              std::cerr << "Unexpected exception retrieving data item: " << e.what() << "\n";
-              return 2;
-            }
-		}
-
-		std::cout << "\n";
-	}
-
-    // output the calculated statistic - note we don't need the data any more so we move it into the temporary test object
-	std::cout << "t = " << std::setprecision(6) << TTest::TTest(std::move(data), type).t() << std::endl;
-	return 0;
+    // output the calculated statistic - note we don't need the data any longer so we move it into the temporary test object
+	std::cout << "t = " << std::setprecision(6) << TTest(std::move(data), type).t() << "\n";
+	return ExitOk;
 }

@@ -6,30 +6,12 @@
 
 #include "DataFile.h"
 
-namespace Statistics::TTest
+namespace Statistics
 {
-    /**
-     * Alias for the type of numeric data.
-     *
-     * Helps keep the code easily maintainable - the underlying numeric type for the data being
-     * processed only needs to change here and the entire codebase will understand.
-     */
-    using DataType = double;
-
-    /**
-     * Convenience alias for the concrete type of the DataFile.
-     */
-    using DataFileType = DataFile<DataType>;
-
-    /**
-     * Type alias for the data file shared pointer.
-     */
-    using DataFilePtr = std::shared_ptr<DataFileType>;
-
     /**
      * The available test types.
      */
-    enum class TestType
+    enum class TTestType
     {
         Paired = 0,
         Unpaired,
@@ -48,12 +30,31 @@ namespace Statistics::TTest
      *
      * The data provided is not validated against these assumptions - that is the caller's responsibility.
      */
-    class TTest {
+    class TTest
+    {
         public:
+            /**
+             * Alias for the type of numeric data.
+             *
+             * Helps keep the code easily maintainable - the underlying numeric type for the data being
+             * processed only needs to change here and the entire codebase will understand.
+             */
+            using Valuetype = double;
+
+            /**
+             * Convenience alias for the concrete type of the DataFile used for TTest objects.
+             */
+            using DataFileType = DataFile<Valuetype>;
+
+            /**
+             * Type alias for the data file shared pointer.
+             */
+            using DataFilePtr = std::shared_ptr<DataFileType>;
+
             /**
              * The default type of t-test.
              */
-            static const TestType DefaultTestType = TestType::Paired;
+            static const TTestType DefaultTestType = TTestType::Paired;
 
             /**
              * Initialise a new t-test.
@@ -68,7 +69,7 @@ namespace Statistics::TTest
              * @param data The data to process.
              * @param type The type of test.
              */
-            explicit TTest(DataFilePtr && data, const TestType & type = DefaultTestType);
+            explicit TTest(DataFilePtr && data, const TTestType & type = DefaultTestType);
 
             /**
              * Initialise a new t-test.
@@ -81,7 +82,7 @@ namespace Statistics::TTest
              * @param data The data to process.
              * @param type The type of test.
              */
-            explicit TTest(DataFileType && data, const TestType & type = DefaultTestType);
+            explicit TTest(DataFileType && data, const TTestType & type = DefaultTestType);
 
             /**
              * Initialise a new t-test.
@@ -94,14 +95,14 @@ namespace Statistics::TTest
              * @param data The data to process.
              * @param type The type of test.
              */
-            explicit TTest(const DataFileType & data, const TestType & type = DefaultTestType);
+            explicit TTest(const DataFileType & data, const TTestType & type = DefaultTestType);
 
             /**
              * Initialise a new t-test with no data.
              *
              * @param type The test type.
              */
-            explicit TTest(const TestType & type = DefaultTestType);
+            explicit TTest(const TTestType & type = DefaultTestType);
 
             /**
              * Check whether the test has data to work with.
@@ -187,7 +188,7 @@ namespace Statistics::TTest
             /**
              * Fetch the type of test.
              */
-            [[nodiscard]] inline TestType type() const
+            [[nodiscard]] inline TTestType type() const
             {
                 return m_type;
             }
@@ -195,7 +196,7 @@ namespace Statistics::TTest
             /**
              * Set the type of test.
              */
-            inline void setType( const TestType & type )
+            inline void setType(const TTestType & type)
             {
                 m_type = type;
             }
@@ -207,9 +208,9 @@ namespace Statistics::TTest
              *
              * If you find a way to optimise the calculation so that it runs 10 times faster, you can reimplement this in a subclass.
              */
-            [[nodiscard]] virtual inline DataType t() const
+            [[nodiscard]] virtual inline Valuetype t() const
             {
-                if(TestType::Paired == m_type) {
+                if(TTestType::Paired == m_type) {
                     return pairedT();
                 }
 
@@ -222,14 +223,14 @@ namespace Statistics::TTest
              *
              * Do not call unless you are certain that the t-test has data. See hasData().
              */
-            [[nodiscard]] DataType pairedT() const;
+            [[nodiscard]] Valuetype pairedT() const;
 
             /**
              * Helper to calculate t for unpaired data.
              *
              * Do not call unless you are certain that the t-test has data. See hasData().
              */
-            [[nodiscard]] DataType unpairedT() const;
+            [[nodiscard]] Valuetype unpairedT() const;
 
         private:
             /**
@@ -244,7 +245,7 @@ namespace Statistics::TTest
             /**
              * The type of test.
              */
-            TestType m_type;
+            TTestType m_type;
     };
 }
 

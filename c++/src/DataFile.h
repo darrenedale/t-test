@@ -16,6 +16,12 @@
 namespace Statistics
 {
     /**
+     * Convenience type alias for a data item parser function.
+     */
+    template<class T>
+    using DataItemParser = T(const std::string_view &);
+
+    /**
      * Default value parser for DataFiles with integer value types.
      *
      * The implementation uses std::from_chars() for all numeric types for which it is defined. To use other types as the underlying value type for DataFile
@@ -50,6 +56,7 @@ namespace Statistics
 
         return ret;
     }
+
     /**
      * Default value parser for DataFiles with integer value types.
      *
@@ -92,12 +99,6 @@ namespace Statistics
 
         return ret;
     }
-
-    /**
-     * Convenience type alias for a data item parser function.
-     */
-    template<class T>
-    using DataItemParser = T(const std::string_view &);
 
     /**
      * A data file for use with a statistical test.

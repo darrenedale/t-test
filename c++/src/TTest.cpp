@@ -3,44 +3,44 @@
 #include <vector>
 #include <cmath>
 
-namespace Statistics::TTest
+namespace Statistics
 {
-	TTest::TTest(DataFilePtr && data, const TestType & type )
+	TTest::TTest(DataFilePtr && data, const TTestType & type )
 	:	m_data(std::move(data)),
 		m_type(type)
 	{}
 
-	TTest::TTest(const DataFileType & data, const TestType & type )
+	TTest::TTest(const DataFileType & data, const TTestType & type )
 	:	m_data(std::make_shared<DataFileType>(data)),
 		m_type(type)
 	{}
 
-	TTest::TTest(DataFileType && data, const TestType & type )
+	TTest::TTest(DataFileType && data, const TTestType & type )
 	:	m_data(std::make_shared<DataFileType>(std::move(data))),
 		m_type(type)
 	{}
 
-	TTest::TTest(const TestType & type)
+	TTest::TTest(const TTestType & type)
 	:	m_data(nullptr),
 		m_type(type)
 	{}
 
-	DataType TTest::pairedT() const
+	TTest::Valuetype TTest::pairedT() const
 	{
         // the number of pairs of observations
 		auto n = m_data->columnItemCount(0);
         
         // differences between pairs of observations: (x1 - x2)
-		std::vector<DataType> diffs(n, NAN);
+		std::vector<Valuetype> diffs(n, NAN);
         
         // squared differences between pairs of observations: (x1 - x2) ^ 2
-		std::vector<DataType> diffs2(n, NAN);
+		std::vector<Valuetype> diffs2(n, NAN);
         
         // sum of differences between pairs of observations: sum[i = 1 to n](x1 - x2)
-		DataType sumDiffs = 0.0;
+		Valuetype sumDiffs = 0.0;
 
         // sum of squared differences between pairs of observations: sum[i = 1 to n]((x1 - x2) ^ 2)
-		DataType sumDiffs2 = 0.0;
+		Valuetype sumDiffs2 = 0.0;
 
 		for(int i = 0; i < n; ++i) {
 			diffs[i] = m_data->item(i, 0) - m_data->item(i, 1);
@@ -49,10 +49,10 @@ namespace Statistics::TTest
 			sumDiffs2 += diffs2[i];
 		}
 
-		return sumDiffs / static_cast<DataType>(std::pow((((static_cast<double>(n) * sumDiffs2) - (sumDiffs * sumDiffs)) / static_cast<double>(n - 1)), 0.5L));
+		return sumDiffs / static_cast<Valuetype>(std::pow((((static_cast<double>(n) * sumDiffs2) - (sumDiffs * sumDiffs)) / static_cast<double>(n - 1)), 0.5L));
 	}
 
-	DataType TTest::unpairedT() const
+	TTest::Valuetype TTest::unpairedT() const
 	{
         // observation counts for each condition
 		auto n1 = m_data->columnItemCount(0);
@@ -86,11 +86,11 @@ namespace Statistics::TTest
 			}
 		}
 
-        sumMeanDiffs1 /= static_cast<DataType>(n1);
-        sumMeanDiffs2 /= static_cast<DataType>(n2);
+        sumMeanDiffs1 /= static_cast<Valuetype>(n1);
+        sumMeanDiffs2 /= static_cast<Valuetype>(n2);
 
         // calculate the statistic
-		DataType t = (mean1 - mean2) / std::pow(((sumMeanDiffs1 / static_cast<DataType>(n1 - 1)) + (sumMeanDiffs2 / static_cast<DataType>(n2 - 1))), 0.5);
+		Valuetype t = (mean1 - mean2) / std::pow(((sumMeanDiffs1 / static_cast<Valuetype>(n1 - 1)) + (sumMeanDiffs2 / static_cast<Valuetype>(n2 - 1))), 0.5);
 
         // always return +ve t
 		if(0 > t) {
