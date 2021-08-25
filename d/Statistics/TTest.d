@@ -6,115 +6,146 @@ import Statistics.DataFile;
 
 class TTest
 {
-	enum Type : ubyte {
+    /**
+     * The default type of test to use when no type is specified in the c'tor.
+     */
+    public static const Type DefaultType = Type.Paired;
+    
+    /**
+     * Alias for the type for the values analysed in a t-test.
+     */
+    public alias ValueType = double;
+
+    /**
+     * The types of t-test available.
+     */
+    enum Type : ubyte
+    {
 		Paired = 0,
 		Unpaired,
 	}
 
+	/**
+	 * The test type.
+	 */
 	private Type m_type;
+	
+	/**
+	 * The data.
+	 */
 	private DataFile m_data;
 
-	this( DataFile data, Type type )
+	/**
+	 * Initialise a new TTest with a data file and optional type.
+	 */
+	public this(DataFile data, Type type = DefaultType)
 	{
 		m_type = type;
 		m_data = data;
 	}
 
-	this( DataFile data )
-	{
-		this(data, Type.Paired);
-	}
-
-	DataFile data()
+	/**
+	 * Fetch the data.
+	 */
+	public DataFile data()
 	{
 		return m_data;
 	}
 
-	void setData( DataFile data )
+	/**
+	 * Set the data to use.
+	 */
+	public void setData(DataFile data)
 	{
 		m_data = data;
 	}
 
-	Type type() const
+	/**
+	 * Fetch the test type.
+	 */
+	public Type type() const
 	{
 		return m_type;
 	}
 
-	void setType( const Type type )
+	/**
+	 * Set the test type.
+	 */
+	public void setType( const Type type )
 	{
 		m_type = type;
 	}
 
-	double pairedT() const
+	/**
+	 * Helper to calculate the paired t statistic.
+	 */
+	protected ValueType pairedT() const
 	{
 		auto n = m_data.columnItemCount(0);
-		double[] diffs;
-		double[] diffs2;
-		double sumDiffs = 0.0;
-		double sumDiffs2 = 0.0;
+		ValueType[] diffs;
+		ValueType[] diffs2;
+		ValueType sumDiffs = 0.0;
+		ValueType sumDiffs2 = 0.0;
 
 		diffs.length = n;
 		diffs2.length = n;
 
-		foreach(ulong i; 0 .. n) {
+		foreach(DataFile.IndexType i; 0 .. n) {
 			diffs[i] = m_data.item(i, 0) - m_data.item(i, 1);
 			diffs2[i] = diffs[i] * diffs[i];
 			sumDiffs += diffs[i];
 			sumDiffs2 += diffs2[i];
 		}
 
-		return sumDiffs / ((((cast(double) n * sumDiffs2) - (sumDiffs * sumDiffs)) / (n - 1)) ^^ 0.5);
+		return sumDiffs / ((((cast(ValueType) n * sumDiffs2) - (sumDiffs * sumDiffs)) / (n - 1)) ^^ 0.5);
 	}
 
-	double unpairedT() const
+	/**
+	 * Helper to calculate the unpaired t statistic.
+	 */
+	protected ValueType unpairedT() const
 	{
 		auto n1 = m_data.columnItemCount(0);
 		auto n2 = m_data.columnItemCount(1);
 		auto sum1 = m_data.columnSum(0);
 		auto sum2 = m_data.columnSum(1);
-		auto m1 = sum1 / n1;
-		auto m2 = sum2 / n2;
-		auto sumMDiff1 = 0.0;
-		auto sumMDiff2 = 0.0;
+		auto mean1 = sum1 / n1;
+		auto mean2 = sum2 / n2;
+		auto sumMeanDiffs1 = 0.0;
+		auto sumMeanDiffs2 = 0.0;
 
-		foreach(ulong i; 0 .. m_data.rowCount()) {
-			auto x = m_data.item(i, 0);
+		foreach(DataFile.IndexType row; 0 .. m_data.rowCount()) {
+			auto x = m_data.item(row, 0);
 
 			if(!isNaN(x)) {
-				x -= m1;
-				sumMDiff1 += (x * x);
+				x -= mean1;
+				sumMeanDiffs1 += (x * x);
 			}
 
-			x = m_data.item(i, 1);
+			x = m_data.item(row, 1);
 
 			if(!isNaN(x)) {
-				x -= m2;
-				sumMDiff2 += (x * x);
+				x -= mean2;
+				sumMeanDiffs2 += (x * x);
 			}
 		}
 
-		sumMDiff1 /= n1;
-		sumMDiff2 /= n2;
+		sumMeanDiffs1 /= n1;
+		sumMeanDiffs2 /= n2;
+		ValueType t = (mean1 - mean2) / (((sumMeanDiffs1 / (n1 - 1)) + (sumMeanDiffs2 / (n2 - 1))) ^^ 0.5);
 
-// writefln("%s = %d", "n1", n1);
-// writefln("%s = %d", "n2", n2);
-// writefln("%s = %f", "sum1", sum1);
-// writefln("%s = %f", "sum2", sum2);
-// writefln("%s = %f", "mean1", m1);
-// writefln("%s = %f", "mean2", m2);
-// writefln("%s = %f", "sum of mean diffs squared 1", sumMDiff1);
-// writefln("%s = %f", "sum of mean diffs squared 2", sumMDiff2);
-
-		double t = (m1 - m2) / (((sumMDiff1 / (n1 - 1)) + (sumMDiff2 / (n2 - 1))) ^^ 0.5);
-
-		if(0 > t) {
+		if (0 > t) {
 			t = -t;
 		}
 
 		return t;
 	}
 
-	double t() const {
+	/**
+	 * Calculate the t statistic.
+	 */
+	public ValueType t() const
+	{
 		switch(type()) {
 			case Type.Paired:
 				return pairedT();
@@ -123,9 +154,8 @@ class TTest
 				return unpairedT();
 
 			default:
-				/* should never get here! */
-				/* TODO throw exception */
-				return 0.0;
+				// should never get here!
+				throw new Exception("unrecognised t-test type");
 		}
 	}
 }
