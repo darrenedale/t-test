@@ -7,7 +7,7 @@ spl_autoload_register(function (string $className) {
 
 	$path = __DIR__ . "/" . str_replace("\\", "/", $className) . ".php";
 
-	if (is_file($path) && !is_readable($path)) {
+	if (is_file($path) && is_readable($path)) {
 		include $path;
 	}
 });

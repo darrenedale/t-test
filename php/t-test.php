@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-include "autoload.php";
+include __DIR__ . "/autoload.php";
 
 use Statistics\DataFile;
 use Statistics\TTest;

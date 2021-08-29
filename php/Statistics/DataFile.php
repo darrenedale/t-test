@@ -17,7 +17,12 @@ class DataFile
 	 * The path to the file containing the data.
 	 */
 	private string $m_file;
-	
+
+	/**
+	 * @var callable | \Closure The parser for cell content from the CSV file.
+	 */
+	private mixed $m_parser;
+
 	/**
 	 * Initialise a new data file.
 	 *
@@ -26,11 +31,30 @@ class DataFile
 	 * used for the cell.
 	 *
 	 * @param ?string $path The path to a local CSV file to load.
+	 * @param callable|\Closure|null $parser The parser to use to parse cells from the CSV. Defaults to the class's
+	 * default parser.
 	 */
-	public function __construct(string $path = null)
+	public function __construct(string $path = null, callable | \Closure $parser = null)
 	{
+		$this->m_parser = $parser ?? function (string $str): float {
+			return self::defaultParser($str);
+		};
+
 		$this->m_file = $path;
 		$this->reload();
+	}
+
+	/**
+	 * Default parser for values in the CSV.
+	 *
+	 * @param string $str The cell value to parse.
+	 *
+	 * @return float The parsed value.
+	 */
+	protected static function defaultParser(string $str): float
+	{
+		$value = filter_var($str, FILTER_VALIDATE_FLOAT);
+		return (false === $value ? NAN : $value);
 	}
 
 	/**
@@ -268,14 +292,13 @@ class DataFile
 	 */
 	private function reload(): bool
 	{
-		function parser(string $str): float
-		{
-			return (float) $str;
-		}
-
-		// TODO use fgetcsv()
 		if (empty($this->m_file)) {
 			fprintf(STDERR, "no file to read\n");
+			return false;
+		}
+
+		if (!is_callable($this->m_parser)) {
+			fprintf(STDERR, "the data file value parser is not callable\n");
 			return false;
 		}
 
@@ -289,30 +312,7 @@ class DataFile
 		$this->m_data = [];
 
 		while (!feof($in)) {
-			$line = fgets($in);
-			$valueStartPos = 0;
-			$row = [];
-			$rowParsed = false;
-
-			while (!$rowParsed) {
-				$valueEndPos = strpos($line, ",",$valueStartPos);
-
-				if (false === $valueEndPos) {
-					$valueEndPos = strlen($line);
-					$rowParsed = true;
-				}
-
-				try {
-					$row[] = parser(substr($line, $valueStartPos, $valueEndPos - $valueStartPos));
-				} catch (\Throwable $err) {
-					fprintf(STDERR, "ERR exception parsing data: {$err->getMessage()}\n");
-					$row[] = NAN;
-				}
-
-				$valueStartPos = $valueEndPos + 1;
-			}
-
-			$this->m_data[] = $row;
+			$this->m_data[] = array_map($this->m_parser, fgetcsv($in));
 		}
 
 		return true;
