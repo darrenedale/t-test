@@ -15,6 +15,7 @@ class TTest
      * Alias for the type for the values analysed in a t-test.
      */
     public alias ValueType = double;
+    public alias DataFileType = DataFile!(double);
 
     /**
      * The types of t-test available.
@@ -33,12 +34,12 @@ class TTest
 	/**
 	 * The data.
 	 */
-	private DataFile m_data;
+	private DataFileType m_data;
 
 	/**
 	 * Initialise a new TTest with a data file and optional type.
 	 */
-	public this(DataFile data, Type type = DefaultType)
+	public this(DataFileType data, Type type = DefaultType)
 	{
 		m_type = type;
 		m_data = data;
@@ -47,7 +48,7 @@ class TTest
 	/**
 	 * Fetch the data.
 	 */
-	public DataFile data()
+	public DataFileType data()
 	{
 		return m_data;
 	}
@@ -55,7 +56,7 @@ class TTest
 	/**
 	 * Set the data to use.
 	 */
-	public void setData(DataFile data)
+	public void setData(DataFileType data)
 	{
 		m_data = data;
 	}
@@ -90,7 +91,7 @@ class TTest
 		diffs.length = n;
 		diffs2.length = n;
 
-		foreach(DataFile.IndexType i; 0 .. n) {
+		foreach(DataFileType.IndexType i; 0 .. n) {
 			diffs[i] = m_data.item(i, 0) - m_data.item(i, 1);
 			diffs2[i] = diffs[i] * diffs[i];
 			sumDiffs += diffs[i];
@@ -114,7 +115,7 @@ class TTest
 		auto sumMeanDiffs1 = 0.0;
 		auto sumMeanDiffs2 = 0.0;
 
-		foreach(DataFile.IndexType row; 0 .. m_data.rowCount()) {
+		foreach(DataFileType.IndexType row; 0 .. m_data.rowCount()) {
 			auto x = m_data.item(row, 0);
 
 			if(!isNaN(x)) {

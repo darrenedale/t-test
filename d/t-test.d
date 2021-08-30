@@ -32,7 +32,7 @@ void main( string[] args )
 		}
 	}
 
-	auto data = new DataFile(dataFilePath);
+	auto data = new TTest.DataFileType(dataFilePath);
 
 	foreach(r; 0 .. data.rowCount()) {
 		foreach(c; 0 .. data.columnCount()) {

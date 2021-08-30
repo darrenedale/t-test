@@ -6,9 +6,9 @@ import std.file;
 import std.string;
 import std.conv;
 
-class DataFile
+class DataFile(ValueType = double)
 {
-    public alias ValueType = double;
+//    public alias ValueType = double;
     public alias IndexType = ulong;
     
 	private ValueType[][] m_data;
