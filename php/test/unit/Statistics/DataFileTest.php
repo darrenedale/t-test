@@ -5,6 +5,11 @@ namespace unit\Statistics;
 use Statistics\DataFile;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Test case for the Statistics\DataFile class
+ *
+ * @covers \Statistics\DataFile
+ */
 class DataFileTest extends TestCase
 {
 	/**
