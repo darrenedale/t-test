@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Autoloader for t-test application classes.
+ */
 spl_autoload_register(function (string $className) {
 	if ("\\" === $className[0]) {
 		$className = substr($className, 1);

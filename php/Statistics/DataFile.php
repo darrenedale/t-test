@@ -7,7 +7,6 @@ namespace Statistics;
  */
 class DataFile
 {
-
 	/**
 	 * The parsed data.
 	 */
@@ -160,7 +159,7 @@ class DataFile
 	 *
 	 * @return float The mean.
 	 */
-	protected function mean(int $r1 = null, int $c1 = null, int $r2 = null, int $c2 = null, float $meanNumber = 1.0): float
+	public function mean(int $r1 = null, int $c1 = null, int $r2 = null, int $c2 = null, float $meanNumber = 1.0): float
 	{
 		if (!isset($r1)) {
 			$r1 = 0;
