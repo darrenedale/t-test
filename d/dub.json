@@ -1,0 +1,10 @@
+{
+	"authors": [
+		"Darren Edale"
+	],
+	"copyright": "Copyright © 2021, Darren Edale",
+	"description": "Command-line program for the Students' t-test",
+	"license": "Apache-2.0",
+	"name": "t-test",
+	"targetType": "executable"
+}

@@ -1,8 +1,8 @@
-module Statistics.TTest;
+module statistics.tests;
 
 import std.stdio;
 import std.math;
-import Statistics.DataFile;
+import statistics.data : DataFile;
 
 class TTest
 {
@@ -14,8 +14,8 @@ class TTest
     /**
      * Alias for the type for the values analysed in a t-test.
      */
-    public alias ValueType = double;
-    public alias DataFileType = DataFile!(double);
+    public alias ValueType = real;
+    public alias DataFileType = DataFile!(ValueType);
 
     /**
      * The types of t-test available.
@@ -48,7 +48,7 @@ class TTest
 	/**
 	 * Fetch the data.
 	 */
-	public DataFileType data()
+	public ref pure DataFileType data()
 	{
 		return m_data;
 	}
@@ -56,7 +56,7 @@ class TTest
 	/**
 	 * Set the data to use.
 	 */
-	public void setData(DataFileType data)
+	public void setData(ref DataFileType data)
 	{
 		m_data = data;
 	}
@@ -64,7 +64,7 @@ class TTest
 	/**
 	 * Fetch the test type.
 	 */
-	public Type type() const
+	public pure Type type() const
 	{
 		return m_type;
 	}
@@ -72,7 +72,7 @@ class TTest
 	/**
 	 * Set the test type.
 	 */
-	public void setType( const Type type )
+	public void setType(Type type)
 	{
 		m_type = type;
 	}
@@ -80,7 +80,7 @@ class TTest
 	/**
 	 * Helper to calculate the paired t statistic.
 	 */
-	protected ValueType pairedT() const
+	protected pure ValueType pairedT() const
 	{
 		auto n = m_data.columnItemCount(0);
 		ValueType[] diffs;
@@ -104,7 +104,7 @@ class TTest
 	/**
 	 * Helper to calculate the unpaired t statistic.
 	 */
-	protected ValueType unpairedT() const
+	protected pure ValueType unpairedT() const
 	{
 		auto n1 = m_data.columnItemCount(0);
 		auto n2 = m_data.columnItemCount(1);
@@ -145,7 +145,7 @@ class TTest
 	/**
 	 * Calculate the t statistic.
 	 */
-	public ValueType t() const
+	public pure ValueType t() const
 	{
 		switch(type()) {
 			case Type.Paired:
