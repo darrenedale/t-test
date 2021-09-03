@@ -17,6 +17,7 @@ use Statistics\TTest;
 const ExitErrMissingTestType = 1;
 const ExitErrUnrecognisedTestType = 2;
 const ExitErrNoDataFile = 3;
+const ExitErrEmptyDataFile = 4;
 
 /**
  * Options for for -t command-line arg.
@@ -71,8 +72,8 @@ function outputDataFile($out, DataFile $data)
  * - -t specifies the type of test. Follow it with "paired" or "unpaired".
  * - The first arg not recognised as an option is considered the name of the data file.
  *
- * @param int argc Number of command-line args.
- * @param string[] argv Command-line args array, all null-terminated c strings.
+ * @param int $argc Number of command-line args.
+ * @param string[] $argv Command-line args array, all null-terminated c strings.
  */
 $type = TTest::UnpairedTestType;
 
@@ -112,6 +113,12 @@ if (!isset($dataFilePath)) {
 
 // read and output the data
 $data = new DataFile($dataFilePath);
+
+if ($data->isEmpty()) {
+	fprintf(STDERR, "No data in data file (or data file does not exist or could not be opened).\n");
+	return ExitErrEmptyDataFile;
+}
+
 outputDataFile(STDOUT, $data);
 
 // output the calculated statistic

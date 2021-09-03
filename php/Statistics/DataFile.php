@@ -81,6 +81,16 @@ class DataFile
 	}
 
 	/**
+	 * Check whether the data file contains any data.
+	 * 
+	 * @return true if the data file contains zero rows, false otherwise.
+	 */
+	public function isEmpty(): bool
+	{
+		return empty($this->m_data);
+	}
+	
+	/**
 	 * Count the number of items in a given range in the data file.
 	 *
 	 * If no arguments are given, the whole data file is included in the count. If at least one argument is given, all
@@ -301,6 +311,11 @@ class DataFile
 			return false;
 		}
 
+		if (!is_readable($this->m_file)) {
+			fprintf(STDERR, "the data file does not exist or is not readable\n");
+			return false;
+		}
+		
 		$in = fopen($this->m_file, "r");
 
 		if (!$in) {
