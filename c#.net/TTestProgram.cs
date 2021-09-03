@@ -12,6 +12,7 @@ namespace Statistics
         const int ExitOk = 0;
         const int ExitErrInvalidArgs = 1;
         const int ExitErrUnrecognisedTestType = 2;
+        const int ExitErrEmptyDataFile = 3;
 
         static int Main(string[] args)
         {
@@ -53,6 +54,12 @@ namespace Statistics
             }
 
             DataFile data = new DataFile(dataFilePath);
+			
+			if (data.isEmpty) {
+				Console.Error.WriteLine("ERR No data in data file (or data file does not exist or could not be opened).");
+				return ExitErrEmptyDataFile;
+			}
+			
             writeData(data, Console.Out);
 
             TTest tTest = new TTest(data, type);

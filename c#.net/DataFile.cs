@@ -38,6 +38,14 @@ namespace Statistics
             }
         }
 
+		public bool isEmpty
+		{
+			get
+			{
+				return 0 == m_data.Count;
+			}
+		}
+
         public int itemCount
         {
             get
