@@ -1,3 +1,5 @@
+' build with:
+'    fbc -v -x t-test src/main.bas src/Statistics/*.bas
 #include once "string.bi"
 #include once "Statistics/DataFile.bi"
 #include once "Statistics/TTest.bi"
