@@ -8,6 +8,7 @@ Dim ExitOk As Const Integer = 0
 Dim ExitErrMissingTestType As Const Integer = 1
 Dim ExitErrMissingDataFile As Const Integer = 2
 Dim ExitErrInvalidTestType As Const Integer = 3
+Dim ExitErrEmptyDataFile As Const Integer = 4
 
 ' output the content of the data file to stdout
 Sub outputDataFile(byref dataFile As Const DataFile)
@@ -91,6 +92,12 @@ If 0 = Len(dataFileName) Then
 End If
 
 Dim testData as DataFile = DataFile(dataFileName)
+
+If testData.isEmpty() Then
+	Print "No data in data file (or data file does not exist or could not be opened)"
+	System(ExitErrEmptyDataFile)
+End If
+
 outputDataFile(testData)
 Print "t = "; Format(TTest(testData, testType).t(), "0.000000")
 System(ExitOk)

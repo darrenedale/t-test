@@ -15,6 +15,10 @@ Namespace Statistics
 	Const Function TTest.testType() As TestType
 		Return m_type
 	End Function
+	
+	Const Function TTest.hasData() As Boolean
+		Return 0 < m_data.rowCount()
+	End Function
 
 	Const Function TTest.t() As DataValue
 		Select Case testType()

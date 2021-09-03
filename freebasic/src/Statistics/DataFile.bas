@@ -8,24 +8,28 @@
 Namespace Statistics
 
 	Constructor DataFile(byref file as const String)
-		This.m_file = file
-		This.reload()
+		m_file = file
+		reload()
 	End Constructor
 
 	Const Function DataFile.rowCount() as SizeType
-		return This.m_data.size()
+		return m_data.size()
 	End Function
 
 	Const Function DataFile.columnCount() as SizeType
-		If 0 < This.rowCount() Then
-			return This.m_data.row(0).size()
+		If 0 < rowCount() Then
+			return m_data.row(0).size()
 		End If
 		
 		return 0
 	End Function
-			
+
+	Const Function DataFile.isEmpty() As Boolean
+		Return 0 = m_data.size()
+	End Function
+
 	Const Function DataFile.item(row As SizeType, column As SizeType) As OptionalValue
-		return This.m_data.row(row + 1).item(column + 1)
+		return m_data.row(row + 1).item(column + 1)
 	End Function
 
 	Const Function DataFile.itemCount() As SizeType
@@ -113,20 +117,20 @@ Namespace Statistics
 	End Function
 	
 	Function DataFile.reload() as Boolean
-		If 0 = Len(This.m_file) Then
+		If 0 = Len(m_file) Then
 			Return False
 		EndIf
 		
 		Var inFile = FreeFile()
 		
-		Open This.m_file For Input As inFile
+		Open m_file For Input As inFile
 		
 		If Err Then
 			Return False
 		End If
 		
 		Dim inLine as String
-		This.m_data.clear()
+		m_data.clear()
 		
 		While Not Eof(infile)
 			Line Input #inFile, inLine
@@ -149,7 +153,7 @@ Namespace Statistics
 				startPos = endPos
 			Loop
 			
-			This.m_data &= row
+			m_data &= row
 		Wend
 		
 		Close inFile

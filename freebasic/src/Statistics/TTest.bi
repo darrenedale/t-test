@@ -15,6 +15,8 @@ Namespace Statistics
 			Declare Function data() ByRef As DataFile
 			Declare Const Function testType() As TestType
 			
+			Declare Const Function hasData() As Boolean
+			
 			Declare Const Function t() As DataValue
 		
 		Protected:

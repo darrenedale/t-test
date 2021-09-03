@@ -11,6 +11,8 @@ Namespace Statistics
 			Declare Const Function rowCount() As SizeType
 			Declare Const Function columnCount() As SizeType
 
+			Declare Const Function isEmpty() As Boolean
+
 			Declare Const Function item(row As SizeType, column As SizeType) As OptionalValue
 
 			Declare Const Function itemCount() As SizeType
