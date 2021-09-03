@@ -19,6 +19,7 @@ namespace
     constexpr const int ExitErrMissingTestType = 1;
     constexpr const int ExitErrUnrecognisedTestType = 2;
     constexpr const int ExitErrNoDataFile = 3;
+    constexpr const int ExitErrEmptyDataFile = 4;
 
     /**
      * Options for for -t command-line arg.
@@ -115,19 +116,19 @@ int main(int argc, char ** argv)
 			if ("-t" == arg) {
 				++i;
 
-                if (i >= argc) {
-                    std::cerr << "ERR -t option requires a type of test - paired or unpaired\n";
-                    return ExitErrMissingTestType;
-                }
+				if (i >= argc) {
+					std::cerr << "ERR -t option requires a type of test - paired or unpaired\n";
+					return ExitErrMissingTestType;
+				}
 
-                auto parsedType = parseTestType(argv[i]);
+				auto parsedType = parseTestType(argv[i]);
 
                 if (!parsedType) {
 					std::cerr << "ERR unrecognised test type \"" << argv[i] << "\"\n";
-                    return ExitErrUnrecognisedTestType;
+					return ExitErrUnrecognisedTestType;
 				}
 
-                type = *parsedType;
+				type = *parsedType;
 			} else {
 				// first unrecognised arg is data file path
 				dataFilePath = arg;
@@ -137,15 +138,21 @@ int main(int argc, char ** argv)
 	}
 
 	if (!dataFilePath) {
-      std::cerr << "No data file provided.\n";
-      return ExitErrNoDataFile;
-    }
+		std::cerr << "No data file provided.\n";
+		return ExitErrNoDataFile;
+	}
 
-    // read and output the data
+	// read and output the data
 	auto data = TTest::DataFileType(*dataFilePath);
+	
+	if (data.isEmpty()) {
+		std::cerr << "No data in data file (or data file does not exist or could not be opened).\n";
+		return ExitErrEmptyDataFile;
+	}
+	
 	std::cout << std::dec << std::fixed << std::left << std::setfill(' ') << std::setprecision(3) << data;
 
-    // output the calculated statistic - note we don't need the data any longer so we move it into the temporary test object
+	// output the calculated statistic - note we don't need the data any longer so we move it into the temporary test object
 	std::cout << "t = " << std::setprecision(6) << TTest(std::move(data), type).t() << "\n";
 	return ExitOk;
 }

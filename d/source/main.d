@@ -13,6 +13,7 @@ const ExitOk = 0;
 const ExitErrMissingTestType = 1;
 const ExitErrUnrecognisedTestType = 2;
 const ExitErrNoDataFile = 3;
+const ExitErrEmptyDataFile = 4;
 
 Nullable!(TTest.Type) parseTestType(string type)
 {
@@ -95,6 +96,12 @@ int main(string[] args)
 	}
 	
 	auto data = new TTest.DataFileType(dataFilePath);
+	
+	if (data.isEmpty()) {
+		stderr.writeln("No data in data file (or data file does not exist or could not be opened).");
+		return ExitErrEmptyDataFile;
+	}
+	
 	outputDataFile(stdout, data);
 	auto t = new TTest(data, type);
 	stdout.writefln("%s = %f", "t", t.t());

@@ -112,6 +112,16 @@ class DataFile(T = real)
 
 		return 0;
 	}
+
+	/**
+	 * Check whether the data file contains any data.
+	 * 
+	 * @return true if the data file contains zero rows, false otherwise.
+	 */
+	public pure bool isEmpty() const
+	{
+		return 0 == m_data.length;
+	}
 	
 	/**
 	 * Count the number of values in the DataFile.

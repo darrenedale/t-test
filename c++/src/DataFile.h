@@ -199,11 +199,21 @@ namespace Statistics
 				return 0;
 			}
 
-            /**
-             * Count the number of values in the DataFile.
-             *
-             * @return The number of values.
-             */
+			/**
+			 * Check whether the data file contains any data.
+			 * 
+			 * @return true if the data file contains zero rows, false otherwise.
+			 */
+			[[nodiscard]] inline bool isEmpty() const
+			{
+				return m_data.empty();
+			}
+
+			/**
+			 * Count the number of values in the DataFile.
+			 *
+			 * @return The number of values.
+			 */
 			[[nodiscard]] inline IndexType itemCount() const
             {
 				return itemCount(0, 0, rowCount() - 1, columnCount() - 1);
