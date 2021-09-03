@@ -18,11 +18,17 @@ Once built, in all cases the program is invoked as:
 
     t-test [-t {paired|unpaired}] data-file
     
-    - **-t** indicates the type of t-test to run. It defaults to a paired test if -t is not
-      specified
-    - **data-file** must be the path to a file containing the data to analyse.
-    
+- **-t** indicates the type of t-test to run. It defaults to a paired test if -t is not specified
+- **data-file** must be the path to a file containing the data to analyse.
+
+## Output
+
+If the data can be analysed, the program outputs the content parsed from the data file followed
+by the t statistic. Otherwise, it outputs an error message indicating why it cannot perform the
+calculation.
+
 ## Data files
+
 Data files must be plain-text CSV containing two columns of observed values. Conditions are
 represented by the first two columns, observations are in rows. Values must be in decimal notation.
 Only the first two columns are considered, any data in further columns is ignored. There must be at
