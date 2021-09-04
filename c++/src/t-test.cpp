@@ -10,6 +10,13 @@
 
 using namespace Statistics;
 
+/**
+ * Instantiation of TTest template for a long double data type.
+ *
+ * For maintenance - to change the underlying data type for our t-tests, just change the template parameter here.
+ */
+using ConcreteTTest = TTest<long double>;
+
 namespace
 {
     /**
@@ -143,7 +150,7 @@ int main(int argc, char ** argv)
 	}
 
 	// read and output the data
-	auto data = TTest::DataFileType(*dataFilePath);
+	auto data = ConcreteTTest::DataFileType(*dataFilePath);
 	
 	if (data.isEmpty()) {
 		std::cerr << "No data in data file (or data file does not exist or could not be opened).\n";
@@ -153,6 +160,6 @@ int main(int argc, char ** argv)
 	std::cout << std::dec << std::fixed << std::left << std::setfill(' ') << std::setprecision(3) << data;
 
 	// output the calculated statistic - note we don't need the data any longer so we move it into the temporary test object
-	std::cout << "t = " << std::setprecision(6) << TTest(std::move(data), type).t() << "\n";
+	std::cout << "t = " << std::setprecision(6) << ConcreteTTest(std::move(data), type).t() << "\n";
 	return ExitOk;
 }

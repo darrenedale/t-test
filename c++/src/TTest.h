@@ -3,7 +3,6 @@
 
 #include <memory>
 #include <optional>
-
 #include "DataFile.h"
 
 namespace Statistics
@@ -29,7 +28,21 @@ namespace Statistics
      * - each row contains valid values in both of the first two columns
      *
      * The data provided is not validated against these assumptions - that is the caller's responsibility.
+     *
+     * @tparam T The underlying data type for the values to be tested. Must be a floating-point type. Custom types can be used so long as they satisfy the
+     * following criteria:
+     * - default constructable
+     * - constructable from the constant NAN
+     * - constructable from built-in integer and floating-point types
+     * - implements multiplication with operator *
+     * - implements division with operator /
+     * - implements addition with operator +
+     * - implements subtraction with operator -
+     * - implements comparison with operator > and operator < or some other combination of comparison operators that enable the compiler to automatically
+     *   create these operators
+     * - has an implementation of std::isnan()
      */
+    template<class T = long double, typename = std::enable_if_t<std::is_floating_point_v<T>>>
     class TTest
     {
         public:
@@ -39,12 +52,12 @@ namespace Statistics
              * Helps keep the code easily maintainable - the underlying numeric type for the data being
              * processed only needs to change here and the entire codebase will understand.
              */
-            using Valuetype = double;
+            using ValueType = T;
 
             /**
              * Convenience alias for the concrete type of the DataFile used for TTest objects.
              */
-            using DataFileType = DataFile<Valuetype>;
+            using DataFileType = DataFile<ValueType>;
 
             /**
              * Type alias for the data file shared pointer.
@@ -69,7 +82,10 @@ namespace Statistics
              * @param data The data to process.
              * @param type The type of test.
              */
-            explicit TTest(DataFilePtr && data, const TTestType & type = DefaultTestType);
+            explicit TTest(DataFilePtr && data, const TTestType & type = DefaultTestType)
+            :	m_data(std::move(data)),
+                 m_type(type)
+            {}
 
             /**
              * Initialise a new t-test.
@@ -82,7 +98,10 @@ namespace Statistics
              * @param data The data to process.
              * @param type The type of test.
              */
-            explicit TTest(DataFileType && data, const TTestType & type = DefaultTestType);
+            explicit TTest(DataFileType && data, const TTestType & type = DefaultTestType)
+            :	m_data(std::make_shared<DataFileType>(std::move(data))),
+                 m_type(type)
+            {}
 
             /**
              * Initialise a new t-test.
@@ -95,14 +114,20 @@ namespace Statistics
              * @param data The data to process.
              * @param type The type of test.
              */
-            explicit TTest(const DataFileType & data, const TTestType & type = DefaultTestType);
+            explicit TTest(const DataFileType & data, const TTestType & type = DefaultTestType)
+            :	m_data(std::make_shared<DataFileType>(data)),
+                 m_type(type)
+            {}
 
             /**
              * Initialise a new t-test with no data.
              *
              * @param type The test type.
              */
-            explicit TTest(const TTestType & type = DefaultTestType);
+            explicit TTest(const TTestType & type = DefaultTestType)
+            :	m_data(nullptr),
+                 m_type(type)
+            {}
 
             /**
              * Check whether the test has data to work with.
@@ -208,7 +233,7 @@ namespace Statistics
              *
              * If you find a way to optimise the calculation so that it runs 10 times faster, you can reimplement this in a subclass.
              */
-            [[nodiscard]] virtual inline Valuetype t() const
+            [[nodiscard]] virtual inline ValueType t() const
             {
                 if(TTestType::Paired == m_type) {
                     return pairedT();
@@ -223,14 +248,85 @@ namespace Statistics
              *
              * Do not call unless you are certain that the t-test has data. See hasData().
              */
-            [[nodiscard]] Valuetype pairedT() const;
+            [[nodiscard]] ValueType pairedT() const
+            {
+                // the number of pairs of observations
+                auto n = m_data->columnItemCount(0);
+
+                // differences between pairs of observations: (x1 - x2)
+                std::vector<ValueType> diffs(n, NAN);
+
+                // squared differences between pairs of observations: (x1 - x2) ^ 2
+                std::vector<ValueType> diffs2(n, NAN);
+
+                // sum of differences between pairs of observations: sum[i = 1 to n](x1 - x2)
+                ValueType sumDiffs = 0.0L;
+
+                // sum of squared differences between pairs of observations: sum[i = 1 to n]((x1 - x2) ^ 2)
+                ValueType sumDiffs2 = 0.0L;
+
+                for(int i = 0; i < n; ++i) {
+                    diffs[i] = m_data->item(i, 0) - m_data->item(i, 1);
+                    diffs2[i] = diffs[i] * diffs[i];
+                    sumDiffs += diffs[i];
+                    sumDiffs2 += diffs2[i];
+                }
+
+                return sumDiffs / static_cast<ValueType>(std::pow((((static_cast<ValueType>(n) * sumDiffs2) - (sumDiffs * sumDiffs)) / static_cast<ValueType>(n - 1)), 0.5L));
+            }
 
             /**
              * Helper to calculate t for unpaired data.
              *
              * Do not call unless you are certain that the t-test has data. See hasData().
              */
-            [[nodiscard]] Valuetype unpairedT() const;
+            [[nodiscard]] ValueType unpairedT() const
+            {
+                // observation counts for each condition
+                auto n1 = static_cast<ValueType>(m_data->columnItemCount(0));
+                auto n2 = static_cast<ValueType>(m_data->columnItemCount(1));
+
+                // sums for each condition
+                auto sum1 = m_data->columnSum(0);
+                auto sum2 = m_data->columnSum(1);
+
+                // means for each condition
+                auto mean1 = sum1 / n1;
+                auto mean2 = sum2 / n2;
+
+                // sum of differences between items and the mean for each condition
+                auto sumMeanDiffs1 = static_cast<ValueType>(0.0L);
+                auto sumMeanDiffs2 = static_cast<ValueType>(0.0L);
+
+                for(auto i = m_data->rowCount() - 1; i >= 0; --i) {
+                    auto x = m_data->item(i, 0);
+
+                    if(!std::isnan(x)) {
+                        x -= mean1;
+                        sumMeanDiffs1 += (x * x);
+                    }
+
+                    x = m_data->item(i, 1);
+
+                    if(!std::isnan(x)) {
+                        x -= mean2;
+                        sumMeanDiffs2 += (x * x);
+                    }
+                }
+
+                sumMeanDiffs1 /= n1;
+                sumMeanDiffs2 /= n2;
+
+                // calculate the statistic
+                ValueType t = (mean1 - mean2) / std::pow(((sumMeanDiffs1 / (n1 - 1.0L)) + (sumMeanDiffs2 / (n2 - 1.0L))), 0.5L);
+
+                // always return +ve t
+                if(0.0L > t) {
+                    t = -t;
+                }
+
+                return t;
+            }
 
         private:
             /**
