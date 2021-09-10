@@ -6,14 +6,27 @@ class DataFile
     ## array of strings is parsed as a Float. If this fails, the value for that cell is considered missing (Float::NAN); otherwise, the parsed value
     ## is used for the cell.
     ##
+    ## The parser is a value that can be called with a string and will result in a Float value. It will be called for each string item read from the
+    ## CSV file to parse it into a value to store in the data. The default implementation checks whether the string is a valid representation of a
+    ## decimal floating point value and calls to_f() if it is, or returns Float::NAN if it's not.
+    ##
     ## @param path The path to a local CSV file to load.
-    def initialize(fileName)
+    ## @param parser A custom parser to read values from items in the CSV file.
+    def initialize(fileName, parser = lambda{
+        |str|
+        if str.match(/^\s*[+-]?[0-9]+(?:\.[0-9]+)?\s*$/)
+            return str.to_f();
+        else
+            return Float::NAN;
+        end
+     })
         if String != fileName.class
             raise "fileName must be a String";
         end
 
         @file = fileName;
         @data = [];
+        @parser = parser;
         reload()
     end
 
@@ -193,6 +206,11 @@ class DataFile
 
     protected
 
+    ## The parser for values read from the CSV file
+    def parser
+        return @parser;
+    end
+
     ## Count the number of items in a given range in the data file.
     ##
     ## Note that some cells in the data file can be empty, so the count is not simply the product of the range dimensions.
@@ -297,17 +315,14 @@ class DataFile
 
                 line.split(",").each {
                     |item|
+                    value = parser.call(item);
 
-                    if item.match(/^\s*[+-]?[0-9]+(?:\.[0-9]+)?\s*$/)
-                        row.append(item.to_f())
-                    else
-                        if !item.strip().empty?
-                            # if it's not empty it's an invalid number
-                            STDOUT.puts("ERR invalid data item : #{item}");
-                        end
-
-                        row.append(Float::NAN);
+                    if value.nan? && !item.strip().empty?
+                        # if a NaN is not from an empty string it's an invalid number
+                        STDOUT.puts("ERR invalid data item : #{item}");
                     end
+
+                    row.append(value);
                 }
 
                 @data.append(row);
