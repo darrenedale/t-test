@@ -53,7 +53,7 @@ class DataFile
     ## Check whether the data file contains any data.
     ## 
     ## @return true if the data file contains zero rows, false otherwise.
-    def isEmpty
+    def isEmpty?
         return 0 == rowCount
     end
 
@@ -61,7 +61,7 @@ class DataFile
     ##
     ## @return The number of values.
     def itemCount
-        if isEmpty
+        if isEmpty?
             return 0;
         end
         
@@ -75,7 +75,7 @@ class DataFile
     ##
     ## @return The number of values.
     def rowItemCount(row = 0)
-        if isEmpty
+        if isEmpty?
             return 0;
         end
 
@@ -93,7 +93,7 @@ class DataFile
     ##
     ## @return The number of values.
     def columnItemCount(col)
-        if isEmpty
+        if isEmpty?
             return 0;
         end
 
@@ -108,7 +108,7 @@ class DataFile
     ##
     ## @return The sum.
     def sum(pow = 1.0)
-        if isEmpty
+        if isEmpty?
             return 0.0;
         end
         
@@ -123,7 +123,7 @@ class DataFile
             raise "row out of bounds";
         end
 
-        if isEmpty
+        if isEmpty?
             return 0.0;
         end
 
@@ -138,7 +138,7 @@ class DataFile
             raise "column out of bounds";
         end
 
-        if isEmpty
+        if isEmpty?
             return 0.0;
         end
 
@@ -149,7 +149,7 @@ class DataFile
     ##
     ## @return The mean.
     def mean(meanNumber = 1.0)
-        if isEmpty
+        if isEmpty?
             return 0.0;
         end
         
@@ -164,7 +164,7 @@ class DataFile
             raise "row out of bounds";
         end
 
-        if isEmpty
+        if isEmpty?
             return 0.0;
         end
 
@@ -179,7 +179,7 @@ class DataFile
             raise "column out of bounds";
         end
 
-        if isEmpty
+        if isEmpty?
             return 0.0;
         end
 
@@ -188,11 +188,11 @@ class DataFile
 
     ## Fetch an item from the DataFile.
     ##
-    ## @param row The index of the row from which the value is sought.
-    ## @param col The index of the column from which the value is sought.
+    ## @param row The index of the row from which the value is sought. Named parameter.
+    ## @param col The index of the column from which the value is sought. Named parameter.
     ##
     ## @return The value. This will be Float::NAN if the cell is empty. 
-    def item(row, col)
+    def item(row:, col:)
         if 0 > row || rowCount <= row
             raise "row out of bounds";
         end
@@ -229,7 +229,7 @@ class DataFile
             (c1 .. c2).each {
                 |col|
 
-                if !item(row, col).nan?
+                if !item(row: row, col: col).nan?
                     count += 1;
                 end
             }
@@ -254,7 +254,7 @@ class DataFile
             |row|
             (c1 .. c2).each {
                 |col|
-                value = item(row, col);
+                value = item(row: row, col: col);
 
                 if !value.nan?
                     sum += (value ** pow);
@@ -284,7 +284,7 @@ class DataFile
             |row|
             (c1 .. c2).each {
                 |col|
-                value = item(row, col);
+                value = item(row: row, col: col);
 
                 if !value.nan?
                     sum += (value ** meanNumber);
