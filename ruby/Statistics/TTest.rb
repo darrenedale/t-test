@@ -1,22 +1,29 @@
 
+## A class representing a t-test on a given dataset.
+##
+## The class can perform both paired and unpaired analyses. It assumes that:
+## - the data is organised with conditions represented by columns and observations represented by rows
+## - the data to analyse has has at least two columns
+## - the data to analyse is in the first two columns
+##
+## For paired tests it further assumes that:
+## - each row contains valid values in both of the first two columns
+##
+## The data provided is not validated against these assumptions - that is the caller's responsibility.
 class TTest
-    # available types of t-test
-    PairedType = 0;
-    UnpairedType = 2;
-
-   ## A class representing a t-test on a given dataset.
-   ##
-   ## The class can perform both paired and unpaired analyses. It assumes that:
-   ## - the data is organised with conditions represented by columns and observations represented by rows
-   ## - the data to analyse has has at least two columns
-   ## - the data to analyse is in the first two columns
-   ##
-   ## For paired tests it further assumes that:
-   ## - each row contains valid values in both of the first two columns
-   ##
-   ## The data provided is not validated against these assumptions - that is the caller's responsibility.
-   def initialize(data, type)
-        if UnpairedType != type && PairedType != type
+    ## Initialise a new t-test.
+    ##
+    ## The t-test object shares ownership of the provided data with the provider. The
+    ## data is intended to be available to modify externally (e.g. an app could
+    ## implement a store of data files and an editor for data files), with the t-test
+    ## automatically keeping up-to-date with external changes.
+    ##
+    ## The default test type is a paired test.
+    ##
+    ## @param data The data to process.
+    ## @param type The type of test. Must be one of the symbols :UnpairedTTest or :PairedTTest.
+    def initialize(data, type)
+        if :UnpairedTTest != type && :PairedTTest != type
             raise "Invalid test type";
         end
 
@@ -31,26 +38,33 @@ class TTest
         return nil != @data
     end
 
+    ## Fetch a reference to the t-test's data.
+    ##
+    ## The data will be nil if none has been set (see hasData).
     def data
         return @data
     end
 
+    ## Set the data for the t-test.
+    ##
+    ## The data provided can be nil to unset the test's data. The test object keeps a reference to the provided data -
+    ## changes made to the referenced data outside the class will be reflected in the data used by the test.
     def data=(data)
         @data = data
     end
 
     ## Fetch the type of test.
     ##
-    ## Guaranteed to be one of the test type constants.
+    ## Guaranteed to be one of the test type symbols :PairedTTest or :UnpairedTTest.
     def type
         return @type
     end
 
     ## Set the type of test.
     ##
-    ## Raises an error if typeis not one of the test type constants.
+    ## Raises an error if typeis not one of the test type symbols.
     def type=(type)
-        if UnpairedType != type && PairedType != type
+        if :UnpairedTTest != type && :PairedTTest != type
             raise "Invalid test type";
         end
 
@@ -65,7 +79,7 @@ class TTest
     ##
     ## Guaranteed to be a Float.
     def t
-        if PairedType == type
+        if :PairedTTest == type
             return pairedT;
         end
 
