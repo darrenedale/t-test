@@ -6,14 +6,13 @@ class DataFile
     ## array of strings is parsed as a Float. If this fails, the value for that cell is considered missing (Float::NAN); otherwise, the parsed value
     ## is used for the cell.
     ##
-    ## The parser is a value that can be called with a string and will result in a Float value. It will be called for each string item read from the
+    ## The parser is a object that can be called with a string and will result in a Float value. It will be called for each string item read from the
     ## CSV file to parse it into a value to store in the data. The default implementation checks whether the string is a valid representation of a
     ## decimal floating point value and calls to_f() if it is, or returns Float::NAN if it's not.
     ##
     ## @param path The path to a local CSV file to load.
     ## @param parser A custom parser to read values from items in the CSV file.
-    def initialize(fileName, parser = lambda{
-        |str|
+    def initialize(fileName, parser = ->(str) {
         if str.match(/^\s*[+-]?[0-9]+(?:\.[0-9]+)?\s*$/)
             return str.to_f();
         else
@@ -204,7 +203,7 @@ class DataFile
         return @data[row][col];
     end
 
-    protected
+    private
 
     ## The parser for values read from the CSV file
     def parser
@@ -295,8 +294,6 @@ class DataFile
 
         return (sum / n) ** (1.0 / meanNumber);
     end
-
-    private
 
     ## Helper to reload the data from the file.
     ## 

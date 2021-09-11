@@ -50,6 +50,10 @@ class TTest
     ## The data provided can be nil to unset the test's data. The test object keeps a reference to the provided data -
     ## changes made to the referenced data outside the class will be reflected in the data used by the test.
     def data=(data)
+        if data && !data.instance_of?(DataFile)
+            raise "Invalid data file"
+        end
+
         @data = data
     end
 
@@ -86,7 +90,7 @@ class TTest
         return unpairedT;
     end
 
-    protected
+    private
 
     ## Helper to calculate t for paired data.
     ##
