@@ -53,6 +53,8 @@ end
 require_relative "Statistics/DataFile";
 require_relative "Statistics/TTest";
 
+include Statistics;
+
 # Entry point
 testType = :UnpairedTTest;
 dataFilePath = nil;
