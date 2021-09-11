@@ -43,7 +43,7 @@ def outputDataFile(outStream, data)
         |row|
         (col = 0 .. data.columnCount - 1).each {
             |col|
-            print("%0.3f  " % data.item(row, col));
+            print("%0.3f  " % data.item(row: row, col: col));
         }
     
         puts();

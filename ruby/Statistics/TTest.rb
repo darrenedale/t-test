@@ -11,6 +11,10 @@
 ##
 ## The data provided is not validated against these assumptions - that is the caller's responsibility.
 class TTest
+    ## Default getters.
+    attr_reader :data;
+    attr_reader :type;
+
     ## Initialise a new t-test.
     ##
     ## The t-test object shares ownership of the provided data with the provider. The
@@ -34,15 +38,8 @@ class TTest
     ## Check whether the test has some data set.
     ##
     ## true if the test has data, false otherwise.
-    def hasData
+    def hasData?
         return nil != @data
-    end
-
-    ## Fetch a reference to the t-test's data.
-    ##
-    ## The data will be nil if none has been set (see hasData).
-    def data
-        return @data
     end
 
     ## Set the data for the t-test.
@@ -55,13 +52,6 @@ class TTest
         end
 
         @data = data
-    end
-
-    ## Fetch the type of test.
-    ##
-    ## Guaranteed to be one of the test type symbols :PairedTTest or :UnpairedTTest.
-    def type
-        return @type
     end
 
     ## Set the type of test.
@@ -77,7 +67,7 @@ class TTest
 
     ## Calculate and return t.
     ##
-    ## Do not call unless you are certain that the t-test has data. See hasData().
+    ## Do not call unless you are certain that the t-test has data. See hasData.
     ##
     ## If you find a way to optimise the calculation so that it runs 10 times faster, you can reimplement this in a subclass.
     ##
@@ -94,7 +84,7 @@ class TTest
 
     ## Helper to calculate t for paired data.
     ##
-    ## Do not call unless you are certain that the t-test has data. See hasData().
+    ## Do not call unless you are certain that the t-test has data. See hasData.
     ##
     ## Guaranteed to be a Float.
     def pairedT
@@ -115,7 +105,7 @@ class TTest
 
         (0 .. n - 1).each {
             |row|
-            diffs.append(@data.item(row, 0) - @data.item(row, 1));
+            diffs.append(@data.item(row: row, col: 0) - @data.item(row: row, col: 1));
             diffs2.append(diffs.last ** 2);
             sumDiffs += diffs.last;
             sumDiffs2 += diffs2.last;
@@ -126,7 +116,7 @@ class TTest
 
     ## Helper to calculate t for unpaired data.
     ##
-    ## Do not call unless you are certain that the t-test has data. See hasData().
+    ## Do not call unless you are certain that the t-test has data. See hasData.
     ##
     ## Guaranteed to be a Float.
     def unpairedT
@@ -144,14 +134,14 @@ class TTest
 
         (0 .. data.rowCount - 1).each {
             |row|
-            x = data.item(row, 0);
+            x = data.item(row: row, col: 0);
 
             if !x.nan?
                 x -= mean1;
                 sumMeanDiffs1 += (x ** 2);
             end
 
-            x = data.item(row, 1);
+            x = data.item(row: row, col: 1);
 
             if !x.nan?
                 x -= mean2;
