@@ -18,8 +18,8 @@ module Statistics
         # [Params]
         # - +path+ The path to a local CSV file to load.
         # - +parser+ A custom parser to convert string cells in the CSV file to numeric values.
-        def initialize(fileName, parser = DataFile.method(:defaultParser))
-            if !fileName.instance_of?(String)
+        def initialize(fileName = nil, parser = DataFile.method(:defaultParser))
+            if fileName && !fileName.instance_of?(String)
                 raise "fileName must be a String";
             end
 
@@ -105,7 +105,7 @@ module Statistics
         #
         # [Return]
         # +Integer+ The number of values.
-        def columnItemCount(col)
+        def columnItemCount(col = 0)
             if empty?
                 return 0;
             end
@@ -375,7 +375,7 @@ module Statistics
         # [Return]
         # +true+ on success, +false+ on failure.
         def reload()
-            if @file.empty?
+            if !@file || @file.empty?
                 return false
             end
 
