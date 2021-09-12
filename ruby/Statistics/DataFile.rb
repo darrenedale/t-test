@@ -316,7 +316,7 @@ module Statistics
         # - +pow+ The power to which to raise each value before it is added to the sum. Defaults to 1.0.
         #
         # [Return]
-        # +Float+ The mean of the values in the range.
+        # +Float+ The sum of the values in the range.
         def rangeSum(r1, c1, r2, c2, pow = 1.0)
             sum = 0.0;
 
@@ -341,10 +341,10 @@ module Statistics
         # The arithmetic mean, which is often referred to as the average, is meanNumber 1; the quadratic is 2; the geometric is -1.
         #
         # [Params]
-        # - +r1+ The topmost row to include in the count.
-        # - +c1+ The leftmost column to include in the count.
-        # - +r2+ The bottom-most row to include in the count.
-        # - +c2+ The rightmost column to include in the count.
+        # - +r1+ The topmost row to include in the calculation.
+        # - +c1+ The leftmost column to include in the calculation.
+        # - +r2+ The bottom-most row to include in the calculation.
+        # - +c2+ The rightmost column to include in the calculation.
         # - +meanNumber+ Which mean to calculate. Defaults to 1.0 for the arithmetic mean.
         #
         # [Return]
