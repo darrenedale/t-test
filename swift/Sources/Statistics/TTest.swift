@@ -1,10 +1,10 @@
 import Foundation;
 
-class TTest
+public class TTest
 {
-	typealias ValueType = Double;
+	public typealias ValueType = Double;
 
-	enum TestType
+	public enum TestType
 	{
 		case Paired
 		case Unpaired
@@ -13,18 +13,18 @@ class TTest
 	private var m_data: DataFile<ValueType>?;
 	private var m_type: TestType;
 
-	init(withData data: DataFile<ValueType>, ofType type: TestType = TestType.Unpaired)
+	public init(withData data: DataFile<ValueType>, ofType type: TestType = TestType.Unpaired)
 	{
 		self.m_data = data;
 		self.m_type = type;
 	}
 
-	var hasData: Bool
+	public var hasData: Bool
 	{
 		return nil != m_data;
 	}
 
-	var data: DataFile<ValueType>
+	public var data: DataFile<ValueType>
 	{
 		get
 		{
@@ -36,7 +36,7 @@ class TTest
 		}
 	}
 
-	var type: TestType
+	public var type: TestType
 	{
 		get
 		{
@@ -49,7 +49,7 @@ class TTest
 		}
 	}
 
-	var t: ValueType
+	public var t: ValueType
 	{
 		if (TestType.Paired == type) {
 			return pairedT;

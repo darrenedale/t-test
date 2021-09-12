@@ -1,91 +1,7 @@
 
 import Foundation;
 
-protocol LineReader
-{
-	func nextLine() -> String?;
-}
-
-class DataFileReader : LineReader
-{
-	init?(_ fileName: String)
-	{
-		let fh = FileHandle(forReadingAtPath: fileName);
-
-		if (nil == fh) {
-			return nil;
-		}
-
-		m_fileHandle = fh!;
-	}
-
-	public func nextLine() -> String?
-	{
-		var eol = m_cursor;
-
-		while (true) {
-			if (eol == m_buffer.count) {
-				// clear out anything we've already returned to the caller
-				eol -= shrinkBuffer();
-
-				// end of file?
-				if (!readMore()) {
-					// end of file and cursor is already at the end of the buffer, there are no more lines
-					// to read
-					if (eol == m_cursor) {
-						return nil;
-					}
-
-					// NOTE the buffer has been shrunk so we know we're returning the whole thing
-					let line = String(decoding: m_buffer, as: UTF8.self);
-					m_cursor = eol;
-					return line;
-				}
-			}
-
-			if (10 == m_buffer[eol]) {
-				let line = String(decoding: m_buffer[m_cursor ..< eol], as: UTF8.self);
-				m_cursor = eol + 1;
-				return line;
-			}
-
-			eol += 1;
-		}
-	}
-
-	private func readMore(bytes: UInt64 = 1024) -> Bool
-	{
-		let inData = m_fileHandle.readData(ofLength: 1024);
-
-		guard !inData.isEmpty else {
-			return false;
-		}
-
-		m_buffer.append(inData);
-		return true;
-	}
-
-	/**
-	 * @returns The number of bytes recovered from the buffer.
-	 */
-	private func shrinkBuffer() -> Int
-	{
-		guard 0 < m_cursor else {
-			return 0;
-		}
-
-		m_buffer.removeFirst(m_cursor);
-		let removed = m_cursor;
-		m_cursor = 0;
-		return removed;
-	}
-
-	private var m_fileHandle: FileHandle;
-	private var m_buffer: Data = Data();
-	private var m_cursor: Int = 0;
-}
-
-class DataFile<ValueType : BinaryFloatingPoint & LosslessStringConvertible>
+open class DataFile<ValueType : BinaryFloatingPoint & LosslessStringConvertible>
 {
     public typealias ValueParser = (String) -> ValueType;
 
@@ -105,7 +21,7 @@ class DataFile<ValueType : BinaryFloatingPoint & LosslessStringConvertible>
 	 * @param path The path to a local CSV file to load.
 	 * @param parser A custom parser to convert string cells in the CSV file to numeric values.
 	 */
-	init(fromFile path: String? = nil, parsingValuesWith parser: @escaping ValueParser = DataFile.defaultParser)
+	public init(fromFile path: String? = nil, parsingValuesWith parser: @escaping ValueParser = DataFile.defaultParser)
 	{
 		self.m_file = path;
 		self.m_parser = parser;
@@ -275,7 +191,7 @@ class DataFile<ValueType : BinaryFloatingPoint & LosslessStringConvertible>
 	 *
 	 * @return The value.
 	 */
-	public func item(row: UInt64, column: UInt64) -> ValueType
+	open func item(row: UInt64, column: UInt64) -> ValueType
 	{
 		assert(0 <= row && rowCount > row);
 		assert(0 <= column && columnCount > column);
@@ -289,7 +205,7 @@ class DataFile<ValueType : BinaryFloatingPoint & LosslessStringConvertible>
 	 *
 	 * @return The parsed value (ValueType.nan if the string is not a valid decimal floating-point number).
 	 */
-	private static func defaultParser(str: String) -> ValueType
+	public static func defaultParser(str: String) -> ValueType
 	{
         return ValueType(str) ?? ValueType.nan;
 	}
@@ -446,4 +362,88 @@ class DataFile<ValueType : BinaryFloatingPoint & LosslessStringConvertible>
 	private var m_data: [[ValueType]]?;
 	private let m_file: String?;
 	private let m_parser: ValueParser;
+}
+
+/**
+ * Internal helper class to read a file line-by-line.
+ *
+ * TODO make this an extension of FileHandle.
+ */
+private class DataFileReader
+{
+	init?(_ fileName: String)
+	{
+		let fh = FileHandle(forReadingAtPath: fileName);
+
+		if (nil == fh) {
+			return nil;
+		}
+
+		m_fileHandle = fh!;
+	}
+
+	public func nextLine() -> String?
+	{
+		var eol = m_cursor;
+
+		while (true) {
+			if (eol == m_buffer.count) {
+				// clear out anything we've already returned to the caller
+				eol -= shrinkBuffer();
+
+				// end of file?
+				if (!readMore()) {
+					// end of file and cursor is already at the end of the buffer, there are no more lines
+					// to read
+					if (eol == m_cursor) {
+						return nil;
+					}
+
+					// NOTE the buffer has been shrunk so we know we're returning the whole thing
+					let line = String(decoding: m_buffer, as: UTF8.self);
+					m_cursor = eol;
+					return line;
+				}
+			}
+
+			if (10 == m_buffer[eol]) {
+				let line = String(decoding: m_buffer[m_cursor ..< eol], as: UTF8.self);
+				m_cursor = eol + 1;
+				return line;
+			}
+
+			eol += 1;
+		}
+	}
+
+	private func readMore(bytes: UInt64 = 1024) -> Bool
+	{
+		let inData = m_fileHandle.readData(ofLength: 1024);
+
+		guard !inData.isEmpty else {
+			return false;
+		}
+
+		m_buffer.append(inData);
+		return true;
+	}
+
+	/**
+	* @returns The number of bytes recovered from the buffer.
+	*/
+	private func shrinkBuffer() -> Int
+	{
+		guard 0 < m_cursor else {
+			return 0;
+		}
+
+		m_buffer.removeFirst(m_cursor);
+		let removed = m_cursor;
+		m_cursor = 0;
+		return removed;
+	}
+
+	private var m_fileHandle: FileHandle;
+	private var m_buffer: Data = Data();
+	private var m_cursor: Int = 0;
 }

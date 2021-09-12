@@ -1,4 +1,5 @@
 import Foundation;
+import Statistics;
 
 // Exit code for when -t has been specified without a test type.
 let ExitErrMissingTestType: Int32 = 1;
@@ -9,7 +10,7 @@ let ExitErrUnrecognisedTestType: Int32 = 2;
 // Exit code for when no datafile has been provided on the command line..
 let ExitErrNoDataFile: Int32 = 3;
 
-func parseTestType(_ type: String) -> TTest.TestType?
+func parseTestType(_ type: String) -> Statistics.TTest.TestType?
 {
     switch (type.lowercased()) {
         case "paired":

@@ -1,7 +1,7 @@
 // swift-tools-version:5.4
 import PackageDescription
 
-let package = Package(
+let package = Package (
     name: "TTest",
     // platforms: [
     //     .macOS(.v10_15),
@@ -11,8 +11,23 @@ let package = Package(
     // ],
     products: [
         .executable(name: "t-test", targets: ["TTest"]),
+        .library(
+            name: "Statistics",
+            targets: ["Statistics"]),
     ],
     targets: [
-        .executableTarget(name: "TTest", sources: ["main.swift", "TTest.swift", "DataFile.swift"]),
+        .executableTarget(
+            name: "TTest",
+            dependencies: [
+                .target(name: "Statistics")
+            ]
+        ),
+        .target(
+            name: "Statistics",
+            dependencies: []
+        ),
+        .testTarget(
+            name: "Test",
+            dependencies: ["Statistics"]),
     ]
 )
