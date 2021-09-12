@@ -112,12 +112,6 @@ module Statistics
             # the number of pairs of observations
             n = data.columnItemCount(0);
 
-            # differences between pairs of observations: (x1 - x2)
-            diffs = [];
-
-            # squared differences between pairs of observations: (x1 - x2) ^ 2
-            diffs2 = [];
-
             # sum of differences between pairs of observations: sum[i = 1 to n](x1 - x2)
             sumDiffs = 0.0;
 
@@ -126,10 +120,9 @@ module Statistics
 
             (0 .. n - 1).each {
                 |row|
-                diffs.append(@data.item(row: row, col: 0) - @data.item(row: row, col: 1));
-                diffs2.append(diffs.last ** 2);
-                sumDiffs += diffs.last;
-                sumDiffs2 += diffs2.last;
+                diff = data.item(row: row, col: 0) - data.item(row: row, col: 1);
+                sumDiffs += diff;
+                sumDiffs2 += diff * diff;
             }
 
             return sumDiffs / ((((n * sumDiffs2) - (sumDiffs * sumDiffs)) / (n - 1)) ** 0.5);
