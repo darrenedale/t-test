@@ -371,6 +371,11 @@ open class DataFile<ValueType : BinaryFloatingPoint & LosslessStringConvertible>
  */
 private class DataFileReader
 {
+	/**
+	 * Initialise a new reader for a given local file.
+	 *
+	 * @param fileName The full path to the local file to read.
+	 */
 	init?(_ fileName: String)
 	{
 		let fh = FileHandle(forReadingAtPath: fileName);
@@ -382,10 +387,16 @@ private class DataFileReader
 		m_fileHandle = fh!;
 	}
 
+	/**
+	 * Read the next line from the CSV file.
+	 *
+	 * @return The next line, as a String, or nil if there are no more lines.
+	 */
 	public func nextLine() -> String?
 	{
 		var eol = m_cursor;
 
+		// traverse the buffer forwards until we locate a LF character
 		while (true) {
 			if (eol == m_buffer.count) {
 				// clear out anything we've already returned to the caller
@@ -399,6 +410,8 @@ private class DataFileReader
 						return nil;
 					}
 
+					// end of file and there's still some data in the buffer so return the content of the buffer (i.e. the last
+					// line in the file)
 					// NOTE the buffer has been shrunk so we know we're returning the whole thing
 					let line = String(decoding: m_buffer, as: UTF8.self);
 					m_cursor = eol;
@@ -416,6 +429,11 @@ private class DataFileReader
 		}
 	}
 
+	/**
+	 * Fill the internal buffer with more bytes read from the file, if possible.
+	 *
+	 * @return true if there were bytes available to read, false if not.
+	 */
 	private func readMore(bytes: UInt64 = 1024) -> Bool
 	{
 		let inData = m_fileHandle.readData(ofLength: 1024);
@@ -429,7 +447,7 @@ private class DataFileReader
 	}
 
 	/**
-	* @returns The number of bytes recovered from the buffer.
+	* @return The number of bytes recovered from the buffer.
 	*/
 	private func shrinkBuffer() -> Int
 	{
