@@ -10,6 +10,13 @@ let ExitErrUnrecognisedTestType: Int32 = 2;
 // Exit code for when no datafile has been provided on the command line..
 let ExitErrNoDataFile: Int32 = 3;
 
+/**
+ # Parse the test type provided on the command line to a symbol.
+ *
+ * @param type The string to parse.
+ *
+ * @return The test type enumerator, or nil if the string is not a valid test type.
+ */
 func parseTestType(_ type: String) -> Statistics.TTest.TestType?
 {
     switch (type.lowercased()) {
@@ -24,14 +31,20 @@ func parseTestType(_ type: String) -> Statistics.TTest.TestType?
     }
 }
 
-func outputDataFile<ValueType>(_ data: DataFile<ValueType>)
+/**
+ * Output a data file to a given file handle.
+ *
+ * @param outFile The FileHandle to write to. It must be open for writing.
+ * @param data The DataFile to write.
+ */
+func outputDataFile<ValueType>(to outFile: FileHandle, _ data: DataFile<ValueType>)
 {
     for row in (0 ..< data.rowCount) {
         for col in (0 ..< data.columnCount) {
-            print(String(format: "%0.3f  ", Double(data.item(row: row, column: col))), terminator: "");
+            try? outFile.write(contentsOf: String(format: "%0.3f  ", Double(data.item(row: row, column: col))).data(using: .utf8)!);
         }
 
-        print("");
+        outFile.write("\n".data(using: .utf8)!);
     }
 }
 
@@ -74,5 +87,5 @@ if (nil == dataFilePath) {
 }
 
 let data = DataFile<TTest.ValueType>(fromFile: dataFilePath);
-outputDataFile(data);
+outputDataFile(to: FileHandle.standardOutput, data);
 print(String(format: "t = %0.6f", (TTest(withData: data, ofType: testType)).t));
