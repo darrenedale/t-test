@@ -1,15 +1,16 @@
 import XCTest;
 import Statistics;
 
-private enum DataFileTestError : Error
-{
-    case failedToRemoveTemporaryFile(_ path: String?);
-    case failedToWriteTemporaryFile(_ path: String?);
-}
-
 class DataFileTest : XCTestCase
 {
+    /**
+     * The value type to use when testing the DataFile class.
+     */
     public typealias ValueType = Double;
+
+    /**
+     * Convenience alias for the concrete type of the DataFile being tested.
+     */
     public typealias TestDataFile = DataFile<ValueType>;
 
     /**
@@ -19,7 +20,7 @@ class DataFileTest : XCTestCase
      * is the maximum amount an actual float value is permitted to vary from its expected value in order to pass
      * testing.
      */
-    let FloatEqualityDelta = 0.000001;
+    static let FloatEqualityDelta = 0.000001;
 
     /**
      * The test data.
@@ -46,31 +47,31 @@ class DataFileTest : XCTestCase
     // this is used to guide the tests and to provided expected data for calculations (sums, counts, means, etc.)
     // if the data in the above array changes, this meta-information must be checked and updated otherwise the test is
     // not valid
-    let TestDataRowCount: UInt64 = 12;
-    let TestDataColumnCount: UInt64 = 2;
+    static let TestDataRowCount: UInt64 = 12;
+    static let TestDataColumnCount: UInt64 = 2;
 
     // items (total, by-row and by-column
-    let TestDataItemCount: UInt64 = 24;
-    let TestDataRowItemCount: [UInt64] = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,];
-    let TestDataColumnItemCount: [UInt64] = [12, 12,];
+    static let TestDataItemCount: UInt64 = 24;
+    static let TestDataRowItemCount: [UInt64] = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,];
+    static let TestDataColumnItemCount: [UInt64] = [12, 12,];
 
     // sums (total, by-row and by-column
-    let TestDataSum: ValueType = 338;
-    let TestDataRowSum: [ValueType] = [26, 26, 26, 29, 29, 27, 31, 31, 29, 28, 29, 27,];
-    let TestDataColumnSum: [ValueType] = [160, 178,];
+    static let TestDataSum: ValueType = 338;
+    static let TestDataRowSum: [ValueType] = [26, 26, 26, 29, 29, 27, 31, 31, 29, 28, 29, 27,];
+    static let TestDataColumnSum: [ValueType] = [160, 178,];
 
     // means (total, by-row and by-column
-    let TestDataArithmeticMean: ValueType = 14.0833333;
-    let TestDataRowArithmeticMean: [ValueType] = [13, 13, 13, 14.5, 14.5, 13.5, 15.5, 15.5, 14.5, 14, 14.5, 13.5,];
-    let TestDataColumnArithmeticMean: [ValueType] = [13.33333333, 14.83333333,];
+    static let TestDataArithmeticMean: ValueType = 14.0833333;
+    static let TestDataRowArithmeticMean: [ValueType] = [13, 13, 13, 14.5, 14.5, 13.5, 15.5, 15.5, 14.5, 14, 14.5, 13.5,];
+    static let TestDataColumnArithmeticMean: [ValueType] = [13.33333333, 14.83333333,];
 
     // whether the data contains identical //s of items in each row/column
-    let TestDataHasUniformRows = true;
-    let TestDataHasUniformColumns = true;
+    static let TestDataHasUniformRows = true;
+    static let TestDataHasUniformColumns = true;
 
     // if the data contains identical //s of items in each row/column, how many per row/column
-    let TestDataUniformRowItemCount: UInt64 = 2;
-    let TestDataUniformColumnItemCount: UInt64 = 12;
+    static let TestDataUniformRowItemCount: UInt64 = 2;
+    static let TestDataUniformColumnItemCount: UInt64 = 12;
 
     /**
      * Test for Statistics::DataFile.rowCount
@@ -79,7 +80,7 @@ class DataFileTest : XCTestCase
     {
         do {
             let testData = try dataFile();
-            XCTAssertEqual(testData.rowCount, TestDataRowCount, "Row count should be \(TestDataRowCount)");
+            XCTAssertEqual(testData.rowCount, DataFileTest.TestDataRowCount, "Row count should be \(DataFileTest.TestDataRowCount)");
         } catch let err {
             XCTFail("No test data available: \(err.localizedDescription)");
         }
@@ -92,7 +93,7 @@ class DataFileTest : XCTestCase
     {
         do {
             let testData = try dataFile();
-            XCTAssertEqual(testData.columnCount, TestDataColumnCount, "Column count should be \(TestDataColumnCount)");
+            XCTAssertEqual(testData.columnCount, DataFileTest.TestDataColumnCount, "Column count should be \(DataFileTest.TestDataColumnCount)");
         } catch let err {
             XCTFail("No test data available: \(err.localizedDescription)");
         }
@@ -105,7 +106,7 @@ class DataFileTest : XCTestCase
     {
         do {
             let testData = try dataFile();
-            XCTAssertEqual(TestDataItemCount, testData.itemCount);
+            XCTAssertEqual(DataFileTest.TestDataItemCount, testData.itemCount);
         } catch let err {
             XCTFail("No test data available: \(err.localizedDescription)");
         }
@@ -119,12 +120,12 @@ class DataFileTest : XCTestCase
         do {
             let testData = try dataFile();
             
-            for row in (0 ..< TestDataRowCount) {
-                XCTAssertEqual(TestDataRowItemCount[Int(row)], testData.rowItemCount(row), "Item count for row \(row) is expected to be \(TestDataRowItemCount[Int(row)])");
+            for row in (0 ..< DataFileTest.TestDataRowCount) {
+                XCTAssertEqual(DataFileTest.TestDataRowItemCount[Int(row)], testData.rowItemCount(row), "Item count for row \(row) is expected to be \(DataFileTest.TestDataRowItemCount[Int(row)])");
             }
 
-            if (TestDataHasUniformRows) {
-                XCTAssertEqual(TestDataUniformRowItemCount, testData.rowItemCount());
+            if (DataFileTest.TestDataHasUniformRows) {
+                XCTAssertEqual(DataFileTest.TestDataUniformRowItemCount, testData.rowItemCount());
             }
         } catch let err {
             XCTFail("No test data available: \(err.localizedDescription)");
@@ -139,12 +140,12 @@ class DataFileTest : XCTestCase
         do {
             let testData = try dataFile();
             
-            for column in (0 ..< TestDataColumnCount) {
-                XCTAssertEqual(TestDataColumnItemCount[Int(column)], testData.columnItemCount(column), "Item count for column \(column) is expected to be \(TestDataColumnItemCount[Int(column)])");
+            for column in (0 ..< DataFileTest.TestDataColumnCount) {
+                XCTAssertEqual(DataFileTest.TestDataColumnItemCount[Int(column)], testData.columnItemCount(column), "Item count for column \(column) is expected to be \(DataFileTest.TestDataColumnItemCount[Int(column)])");
             }
 
-            if (TestDataHasUniformColumns) {
-                XCTAssertEqual(TestDataUniformColumnItemCount, testData.columnItemCount());
+            if (DataFileTest.TestDataHasUniformColumns) {
+                XCTAssertEqual(DataFileTest.TestDataUniformColumnItemCount, testData.columnItemCount());
             }
         } catch let err {
             XCTFail("No test data available: \(err.localizedDescription)");
@@ -158,9 +159,9 @@ class DataFileTest : XCTestCase
     {
         do {
             let testData = try dataFile();
-            XCTAssertEqual(TestDataSum, testData.sum(), accuracy: FloatEqualityDelta);
-            XCTAssertEqual(TestDataSum, TestDataRowSum.reduce(0, { sum, value in sum + value }), accuracy: FloatEqualityDelta, "ERROR IN TEST CODE: expected data file sum and expected row sums do not agree");
-            XCTAssertEqual(TestDataSum, TestDataColumnSum.reduce(0, { sum, value in sum + value }), accuracy: FloatEqualityDelta, "ERROR IN TEST CODE: expected data file sum and expected COLUMN sums do not agree");
+            XCTAssertEqual(DataFileTest.TestDataSum, testData.sum(), accuracy: DataFileTest.FloatEqualityDelta);
+            XCTAssertEqual(DataFileTest.TestDataSum, DataFileTest.TestDataRowSum.reduce(0, { sum, value in sum + value }), accuracy: DataFileTest.FloatEqualityDelta, "ERROR IN TEST CODE: expected data file sum and expected row sums do not agree");
+            XCTAssertEqual(DataFileTest.TestDataSum, DataFileTest.TestDataColumnSum.reduce(0, { sum, value in sum + value }), accuracy: DataFileTest.FloatEqualityDelta, "ERROR IN TEST CODE: expected data file sum and expected COLUMN sums do not agree");
         } catch let err {
             XCTFail("No test data available: \(err.localizedDescription)");
         }
@@ -174,8 +175,8 @@ class DataFileTest : XCTestCase
         do {
             let testData = try dataFile();
             
-            for row in (0 ..< TestDataRowCount) {
-                XCTAssertEqual(TestDataRowSum[Int(row)], testData.rowSum(row), accuracy: FloatEqualityDelta, "Sum for row \(row) is expected to be \(TestDataRowSum[Int(row)])");
+            for row in (0 ..< DataFileTest.TestDataRowCount) {
+                XCTAssertEqual(DataFileTest.TestDataRowSum[Int(row)], testData.rowSum(row), accuracy: DataFileTest.FloatEqualityDelta, "Sum for row \(row) is expected to be \(DataFileTest.TestDataRowSum[Int(row)])");
             }
         } catch let err {
             XCTFail("No test data available: \(err.localizedDescription)");
@@ -190,8 +191,8 @@ class DataFileTest : XCTestCase
         do {
             let testData = try dataFile();
 
-            for column in (0 ..< TestDataColumnCount) {
-                XCTAssertEqual(TestDataColumnSum[Int(column)], testData.columnSum(column), accuracy: FloatEqualityDelta, "Sum for column \(column) is expected to be \(TestDataColumnSum[Int(column)])");
+            for column in (0 ..< DataFileTest.TestDataColumnCount) {
+                XCTAssertEqual(DataFileTest.TestDataColumnSum[Int(column)], testData.columnSum(column), accuracy: DataFileTest.FloatEqualityDelta, "Sum for column \(column) is expected to be \(DataFileTest.TestDataColumnSum[Int(column)])");
             }
         } catch let err {
             XCTFail("No test data available: \(err.localizedDescription)");
@@ -205,7 +206,7 @@ class DataFileTest : XCTestCase
     {
         do {
             let testData = try dataFile();
-            XCTAssertEqual(TestDataArithmeticMean, testData.mean(), accuracy: FloatEqualityDelta);
+            XCTAssertEqual(DataFileTest.TestDataArithmeticMean, testData.mean(), accuracy: DataFileTest.FloatEqualityDelta);
         } catch let err {
             XCTFail("No test data available: \(err.localizedDescription)");
         }
@@ -219,8 +220,8 @@ class DataFileTest : XCTestCase
         do {
             let testData = try dataFile();
 
-            for row in (0 ..< TestDataRowCount) {
-                XCTAssertEqual(TestDataRowArithmeticMean[Int(row)], testData.rowMean(row), accuracy: FloatEqualityDelta, "Mean for row \(row) is expected to be \(TestDataRowArithmeticMean[Int(row)])");
+            for row in (0 ..< DataFileTest.TestDataRowCount) {
+                XCTAssertEqual(DataFileTest.TestDataRowArithmeticMean[Int(row)], testData.rowMean(row), accuracy: DataFileTest.FloatEqualityDelta, "Mean for row \(row) is expected to be \(DataFileTest.TestDataRowArithmeticMean[Int(row)])");
             }
         } catch let err {
             XCTFail("No test data available: \(err.localizedDescription)");
@@ -235,8 +236,8 @@ class DataFileTest : XCTestCase
         do {
             let testData = try dataFile();
 
-            for column in (0 ..< TestDataColumnCount) {
-                XCTAssertEqual(TestDataColumnArithmeticMean[Int(column)], testData.columnMean(column), accuracy: FloatEqualityDelta, "Mean for column \(column) is expected to be \(TestDataColumnArithmeticMean[Int(column)])");
+            for column in (0 ..< DataFileTest.TestDataColumnCount) {
+                XCTAssertEqual(DataFileTest.TestDataColumnArithmeticMean[Int(column)], testData.columnMean(column), accuracy: DataFileTest.FloatEqualityDelta, "Mean for column \(column) is expected to be \(DataFileTest.TestDataColumnArithmeticMean[Int(column)])");
             }
         } catch let err {
             XCTFail("No test data available: \(err.localizedDescription)");
@@ -256,7 +257,7 @@ class DataFileTest : XCTestCase
 
                 for column: UInt64 in (0 ..< UInt64(DataFileTest.TestData[Int(row)].count)) {
                     XCTAssertGreaterThan(testData.columnCount, column, "missing column in data file");
-                    XCTAssertEqual(DataFileTest.TestData[Int(row)][Int(column)], testData.item(row: row, column: column), accuracy: FloatEqualityDelta, "Item at R\(row), C\(column) is expected to be \(DataFileTest.TestData[Int(row)][Int(column)])");
+                    XCTAssertEqual(DataFileTest.TestData[Int(row)][Int(column)], testData.item(row: row, column: column), accuracy: DataFileTest.FloatEqualityDelta, "Item at R\(row), C\(column) is expected to be \(DataFileTest.TestData[Int(row)][Int(column)])");
                 }
             }
         } catch let err {
@@ -309,6 +310,13 @@ class DataFileTest : XCTestCase
         return m_tempDataFile!;
     }
 
+    /**
+     * The DataFile with the test data in it.
+     */
     private var m_tempDataFile: TestDataFile?;
+
+    /**
+     * Where the temporary CSV file with the test data has been stored.
+     */
     private var m_testDataUrl: URL?;
 }

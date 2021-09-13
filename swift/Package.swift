@@ -3,17 +3,15 @@ import PackageDescription
 
 let package = Package (
     name: "TTest",
-    // platforms: [
-    //     .macOS(.v10_15),
-    //     .macOS(.v10_15),
-    //     .macOS(.v10_15),
-    //     .macOS(.v10_15),
-    // ],
     products: [
-        .executable(name: "t-test", targets: ["TTest"]),
+        .executable(
+            name: "t-test",
+            targets: ["TTest"]
+        ),
         .library(
             name: "Statistics",
-            targets: ["Statistics"]),
+            targets: ["Statistics"]
+        ),
     ],
     targets: [
         .executableTarget(
@@ -28,6 +26,7 @@ let package = Package (
         ),
         .testTarget(
             name: "Test",
-            dependencies: ["Statistics"]),
+            dependencies: ["Statistics"]
+        ),
     ]
 )
