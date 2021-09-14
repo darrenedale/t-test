@@ -4,13 +4,13 @@
 #include <stdbool.h>
 #include "datafile.h"
 
-typedef enum ttesttype_t
+typedef enum ttesttype_s
 {
     PairedT = 0,
     UnpairedT
 } TTestType;
 
-typedef struct ttest_t
+typedef struct ttest_s
 {
     TTestType type;
     const DataFile * data;

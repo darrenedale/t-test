@@ -5,9 +5,9 @@
 #include <assert.h>
 
 /**
- * macros that defines a type that is a self-managing "array" of an arbitrary type. This is a very rough polyfill
- * for the absence of generics from the C language. It's far more limited than actual generics, but it serves a
- * purpose.
+ * Macros that define a type that is a self-managing "array" of an arbitrary type. This is a very rough polyfill
+ * for the absence of generics from the C language. It's far more limited than actual generics in most other
+ * languages.
  * 
  * Example:
  * 
@@ -108,14 +108,14 @@
  * wherever you want to use your DoubleArray type.)
  */
 #define DECLARE_ARRAY_TYPE(StoredType, ArrayTypeName)    \
-struct array_##ArrayTypeName##_s    \
+struct generic_array_##ArrayTypeName##_s    \
 {    \
     int capacity;    \
     int size;    \
     StoredType * data;    \
 };    \
     \
-typedef struct array_##ArrayTypeName##_s ArrayTypeName;    \
+typedef struct generic_array_##ArrayTypeName##_s ArrayTypeName;    \
     \
 ArrayTypeName * new##ArrayTypeName();    \
 void initialise##ArrayTypeName(ArrayTypeName *); \

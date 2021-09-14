@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-typedef struct datafile_t
+typedef struct datafile_s
 {
     double ** data;
     int rowCount;

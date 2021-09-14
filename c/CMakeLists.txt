@@ -14,6 +14,11 @@ add_executable(
     src/statistics/util.c
 )
 
+add_executable(
+    GenericArrayDemo
+    src/array-demo.c
+)
+
 target_link_libraries(
     TTest
     m
@@ -23,4 +28,10 @@ set_target_properties(
     TTest
     PROPERTIES
     RUNTIME_OUTPUT_NAME t-test
+)
+
+set_target_properties(
+    GenericArrayDemo
+    PROPERTIES
+    RUNTIME_OUTPUT_NAME array-demo
 )
