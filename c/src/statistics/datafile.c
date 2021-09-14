@@ -4,13 +4,17 @@
 #include <ctype.h>
 #include <math.h>
 #include "datafile.h"
+#include "util.h"
 
-bool reloadDataFile(struct DataFile *, const char *);
-void resetDataFile(struct DataFile *);
+int dataFileRangeItemCount(const DataFile *, int, int, int, int);
+double dataFileRangeSum(const DataFile *, int, int, int, int, double);
+double dataFileRangeMean(const DataFile *, int, int, int, int, double);
+bool reloadDataFile(DataFile *, const char *);
+void resetDataFile(DataFile *);
 
-struct DataFile * newDataFile(const char * fileName)
+DataFile * newDataFile(const char * fileName)
 {
-    struct DataFile * dataFile = (struct DataFile *) malloc(sizeof(struct DataFile));
+    DataFile * dataFile = (DataFile *) malloc(sizeof(DataFile));
     dataFile->data = (void *) 0;
     dataFile->rowCount = 0;
     dataFile->columnCounts = (void *) 0;
@@ -22,19 +26,24 @@ struct DataFile * newDataFile(const char * fileName)
     return dataFile;
 }
 
-void freeDataFile(struct DataFile ** dataFile)
+void freeDataFile(DataFile ** dataFile)
 {
     resetDataFile(*dataFile);
     free(*dataFile);
     *dataFile = (void *) 0;
 }
 
-int dataFileRowCount(const struct DataFile * dataFile)
+bool dataFileIsEmpty(const DataFile * dataFile)
+{
+    return 0 == dataFile->rowCount;
+}
+
+int dataFileRowCount(const DataFile * dataFile)
 {
     return dataFile->rowCount;
 }
 
-int dataFileColumnCount(const struct DataFile * dataFile)
+int dataFileColumnCount(const DataFile * dataFile)
 {
     if (!dataFile->columnCounts) {
         return 0;
@@ -43,13 +52,58 @@ int dataFileColumnCount(const struct DataFile * dataFile)
     return dataFile->columnCounts[0];
 }
 
-int dataFileRowColumnCount(const struct DataFile * dataFile, int row)
+int dataFileItemCount(const DataFile * dataFile)
 {
-    assert(0 < row && dataFile->rowCount > row);
-    return dataFile->columnCounts[row];
+    return dataFileRangeItemCount(dataFile, 0, 0, dataFileRowCount(dataFile) - 1, dataFileColumnCount(dataFile) - 1);
 }
 
-double dataFileItem(const struct DataFile * dataFile, int row, int column)
+int dataFileRowItemCount(const DataFile * dataFile, int row)
+{
+    assert(0 <= row && dataFile->rowCount > row);
+    return dataFileRangeItemCount(dataFile, row, 0, row, dataFileColumnCount(dataFile) - 1);
+}
+
+int dataFileColumnItemCount(const DataFile * dataFile, int column)
+{
+    assert(0 <= column && dataFileColumnCount(dataFile) > column);
+    return dataFileRangeItemCount(dataFile, 0, column, dataFileRowCount(dataFile) - 1, column);
+}
+
+double dataFileSum(const DataFile * dataFile, double power)
+{
+    return dataFileRangeSum(dataFile, 0, 0, dataFileRowCount(dataFile) - 1, dataFileColumnCount(dataFile) - 1, power);
+}
+
+double dataFileRowSum(const DataFile * dataFile, int row, double power)
+{
+    assert(0 <= row && dataFile->rowCount > row);
+    return dataFileRangeSum(dataFile, row, 0, row, dataFileColumnCount(dataFile) - 1, power);
+}
+
+double dataFileColumnSum(const DataFile * dataFile, int column, double power)
+{
+    assert(0 <= column && dataFileColumnCount(dataFile) > column);
+    return dataFileRangeSum(dataFile, 0, column, dataFileRowCount(dataFile) - 1, column, power);
+}
+
+double dataFileMean(const DataFile * dataFile, double meanNumber)
+{
+    return dataFileRangeMean(dataFile, 0, 0, dataFileRowCount(dataFile) - 1, dataFileColumnCount(dataFile) - 1, meanNumber);
+}
+
+double dataFileRowMean(const DataFile * dataFile, int row, double meanNumber)
+{
+    assert(0 <= row && dataFile->rowCount > row);
+    return dataFileRangeMean(dataFile, row, 0, row, dataFileColumnCount(dataFile) - 1, meanNumber);
+}
+
+double dataFileColumnMean(const DataFile * dataFile, int column, double meanNumber)
+{
+    assert(0 <= column && dataFileColumnCount(dataFile) > column);
+    return dataFileRangeMean(dataFile, 0, column, dataFileRowCount(dataFile) - 1, column, meanNumber);
+}
+
+double dataFileItem(const DataFile * dataFile, int row, int column)
 {
     assert(0 <= row && row < dataFile->rowCount);
     assert(0 <= column && column < dataFileColumnCount(dataFile));
@@ -59,8 +113,60 @@ double dataFileItem(const struct DataFile * dataFile, int row, int column)
 /*
  * Private functions.
  */
+int dataFileRangeItemCount(const DataFile * dataFile, int firstRow, int firstColumn, int lastRow, int lastColumn)
+{
+    int count = 0;
 
-void resetDataFile(struct DataFile * dataFile)
+    for (int row = firstRow; row <= lastRow; ++row) {
+        int rowLastColumn = min(lastColumn, dataFile->columnCounts[row] - 1);
+
+        for (int col = firstColumn; col <= rowLastColumn; ++col) {
+            if (!isnan(dataFile->data[row][col])) {
+                ++count;
+            }
+        }
+    }
+
+    return count;
+}
+
+double dataFileRangeSum(const DataFile * dataFile, int firstRow, int firstColumn, int lastRow, int lastColumn, double power)
+{
+    double sum = 0.0;
+
+    for (int row = firstRow; row <= lastRow; ++row) {
+        int rowLastColumn = min(lastColumn, dataFile->columnCounts[row] - 1);
+
+        for (int col = firstColumn; col <= rowLastColumn; ++col) {
+            if (!isnan(dataFile->data[row][col])) {
+                sum += pow(dataFile->data[row][col], power);
+            }
+        }
+    }
+
+    return sum;
+}
+
+double dataFileRangeMean(const DataFile * dataFile, int firstRow, int firstColumn, int lastRow, int lastColumn, double meanNumber)
+{
+    double sum = 0.0;
+    int n = 0;
+
+    for (int row = firstRow; row <= lastRow; ++row) {
+        int rowLastColumn = min(lastColumn, dataFile->columnCounts[row] - 1);
+
+        for (int col = firstColumn; col <= rowLastColumn; ++col) {
+            if (!isnan(dataFile->data[row][col])) {
+                sum += pow(dataFile->data[row][col], meanNumber);
+                ++n;
+            }
+        }
+    }
+
+    return pow(sum / n, 1.0 / meanNumber);
+}
+
+void resetDataFile(DataFile * dataFile)
 {
     if (dataFile->data) {
         for (int row = 0; row < dataFile->rowCount; ++row) {
@@ -80,7 +186,7 @@ void resetDataFile(struct DataFile * dataFile)
     dataFile->rowCount = 0;
 }
 
-void parseLineIntoDataFile(struct DataFile * dataFile, char * line)
+void parseLineIntoDataFile(DataFile * dataFile, char * line)
 {
     int col = 0;
 
@@ -145,7 +251,7 @@ void parseLineIntoDataFile(struct DataFile * dataFile, char * line)
     ++dataFile->rowCount;
 }
 
-bool reloadDataFile(struct DataFile * dataFile, const char * fileName)
+bool reloadDataFile(DataFile * dataFile, const char * fileName)
 {
     resetDataFile(dataFile);
     FILE * inFile = fopen(fileName, "r");
