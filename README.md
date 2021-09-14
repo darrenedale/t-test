@@ -48,12 +48,12 @@ The following langauges have implementations:
 - D
 - PHP
 - FreeBASIC
+- C
+- Swift
+- Ruby
 
 The following languages are in the works:
-- C
 - Python
 - Perl
-- Swift
 - Rust
-- Ruby
 - x64 ASM
